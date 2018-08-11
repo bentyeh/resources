@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>bioinfo</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h2 id="homer">HOMER</h2>
+<h3 id="usage-notes">Usage notes</h3>
+<p>Motif finding</p>
+<ul>
+<li>log p-values outputed by findMotifs.pl in knownResults.txt or any of the *.motif file outputs is the <em>natural</em> log p-value
+<ul>
+<li>Source: compare p-value and log p-value of outputs</li>
+</ul></li>
+</ul>
+<h3 id="motif-library">Motif library</h3>
+<p>Overview</p>
+<ul>
+<li>Filename
+<ul>
+<li>known.motifs: known motif enrichment
+<ul>
+<li>HOMER motif library (data/knownTFs/motifs/&lt;mset&gt;/*.motif) + personal motif library (motifs/)
+<ul>
+<li>[vertebrates only:] HOMER motif library = data/knownTFs/motifs/*.motif</li>
+</ul></li>
+</ul></li>
+<li>all.motifs: check against de novo motifs
+<ul>
+<li>known.motifs + updated JASPAR files (update/motifs/*/*.motifs) + common motifs (update/motifs/common.motifs)</li>
+</ul></li>
+</ul></li>
+<li>Directory
+<ul>
+<li>motifs/: custom motifs to be added to data/knownTFs/motifs by updateMotifFiles.pl
+<ul>
+<li>motifs in sudirectories motifs/&lt;mset&gt; get copied over to corresponding data/knownTFs/motifs/&lt;mset&gt; subdirectories and therefore get concatenated into the data/knownTFs/&lt;mset&gt;/known.motifs</li>
+</ul></li>
+</ul></li>
+<li>Mapping from organism to &lt;mset&gt; determined in data/knownTFs/organism.table.txt</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Organism</th>
+<th style="text-align: left;"></th>
+<th style="text-align: left;">human</th>
+<th style="text-align: left;">mouse</th>
+<th style="text-align: left;">rat</th>
+<th style="text-align: left;">frog</th>
+<th style="text-align: left;">zebrafish</th>
+<th style="text-align: left;">fly</th>
+<th style="text-align: left;">worm</th>
+<th style="text-align: left;">yeast</th>
+<th style="text-align: left;">arabidopsis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">&lt;mset&gt;</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">vertebrates</td>
+<td style="text-align: left;">vertebrates</td>
+<td style="text-align: left;">vertebrates</td>
+<td style="text-align: left;">vertebrates</td>
+<td style="text-align: left;">vertebrates</td>
+<td style="text-align: left;">insects</td>
+<td style="text-align: left;">worms</td>
+<td style="text-align: left;">yeast</td>
+<td style="text-align: left;">plants</td>
+</tr>
+</tbody>
+</table>
+<p>Concatenation hierarchy of motif files</p>
+<ul>
+<li><strong>data/knownTFs/&lt;mset&gt;/all.motifs</strong>
+<ul>
+<li><strong>data/knownTFs/&lt;mset&gt;/known.motifs</strong>
+<ul>
+<li>data/knownTFs/motifs/&lt;mset&gt;/*.motif (includes motifs copied from motifs/ folder)</li>
+</ul></li>
+<li>update/motifs/common.motifs</li>
+<li>update/motifs/&lt;mset&gt;/*.motifs
+<ul>
+<li>jaspar.motifs</li>
+<li>other files</li>
+</ul></li>
+</ul></li>
+<li><strong>data/knownTFs/vertebrates/all.motifs</strong>
+<ul>
+<li><strong>data/knownTFs/vertebrates/known.motifs</strong>
+<ul>
+<li>data/knownTFs/motifs/*.motif (includes motifs copied from motifs/ folder)</li>
+</ul></li>
+<li>update/motifs/common.motifs</li>
+<li>update/motifs/vertebrates/*.motifs
+<ul>
+<li>jaspar.motifs</li>
+<li>vert.extra.jaspar.motifs</li>
+</ul></li>
+</ul></li>
+<li><strong>data/knownTFs/[all/]all.motifs</strong>
+<ul>
+<li><strong>data/knownTFs/[all/]known.motifs</strong>
+<ul>
+<li>data/knownTFs/motifs/*.motif (includes motifs copied from motifs/ folder)</li>
+<li>data/knownTFs/motifs/*/*.motif (includes motifs copied from motifs/ folder)</li>
+</ul></li>
+<li>update/motifs/common.motifs</li>
+<li>update/motifs/*/*.motifs</li>
+</ul></li>
+</ul>
+<h3 id="additional-data-files">Additional data/ files</h3>
+<p>promoter/: sequence files for motif enrichment analysis</p>
+<ul>
+<li>not included in the base installation: downloaded via <code>perl configureHomer.pl -install human-p</code></li>
+</ul>
+<p>accession/: flat files for accession number conversion</p>
+<ul>
+<li>not included in the base installation: downloaded via <code>perl configureHomer.pl -install human-o</code></li>
+</ul>
+<h3 id="references">References</h3>
+<p>How motif libraries are used: bin/findMotifs.pl &gt; bin/HomerConfig.pm &gt; <code>checkMSet()</code></p>
+<p>How motif libraries are constructed: update/updateMotifFiles.pl</p>
+</body>
+</html>
