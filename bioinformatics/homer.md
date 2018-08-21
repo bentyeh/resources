@@ -61,47 +61,54 @@ Concatenation hierarchy of motif files (all paths relative to root path of HOMER
 ### Additional data/ files
 promoter/: sequence files for motif enrichment analysis
 - not included in the base installation: downloaded via `perl configureHomer.pl -install human-p`
+- human.seq: +/- 2000 base pairs in each direction from the start of the RefSeq sequence
 
 accession/: flat files for accession number conversion
 - not included in the base installation: downloaded via `perl configureHomer.pl -install human-o`
 
 ## Questions
 
-1. What are all the threshold parameters?
-   - `minlp` (default = -10): natural log p-value threshold at which to stop searching for and optimizing for additional motif seeds
-     - At this point, each oligo has already been expanded into a putative ("seed") motif by constructing a motif matrix based on matched instances with at most 2 mismatches. The enrichment (hypergeometric p-value) of each seed motif is then compared against this `minlp` threshold.
-     - If left at its default value of -10, HOMER (in cpp/Motif2.cpp, as `minimumSeedLogp`) automatically re-adjusts this value based on the number of target sequences.
-   - `reduceThresh` (default = 0.6): similarity threshold to remove similar motifs
-   - `matchThresh` (default = T10): similarity threshold to report alignment (i.e., of *de novo* motifs) with known motifs
-     - Valid values
-       - #: motif matrix correlation threshold
-       - T\[#\]: report top # known motifs regardless of similarity
-     - Reference: bin/compareMotifs.pl
-   - `knownPvalueThresh` (default = 0.01): hypergeometric (or binomial) p-value cutoff for finding known motifs
-     - Determines which known motifs are shown in knownResults.html and in the {outputdir}/knownResults subdirectory
-     - Does not limit known motifs in knownResults.txt
-       - knownResults.txt simply contains statistics (e.g., P-value, Q-value, # of Target Sequences with Motif, etc.) of matching each known motif to gene set.
+- What are all the threshold parameters?
+  - `minlp` (default = -10): natural log p-value threshold at which to stop searching for and optimizing for additional motif seeds
+    - At this point, each oligo has already been expanded into a putative ("seed") motif by constructing a motif matrix based on matched instances with at most 2 mismatches. The enrichment (hypergeometric p-value) of each seed motif is then compared against this `minlp` threshold.
+    - If left at its default value of -10, HOMER (in cpp/Motif2.cpp, as `minimumSeedLogp`) automatically re-adjusts this value based on the number of target sequences.
+  - `reduceThresh` (default = 0.6): similarity threshold to remove similar motifs
+  - `matchThresh` (default = T10): similarity threshold to report alignment (i.e., of *de novo* motifs) with known motifs
+    - Valid values
+      - #: motif matrix correlation threshold
+      - T\[#\]: report top # known motifs regardless of similarity
+    - Reference: bin/compareMotifs.pl
+  - `knownPvalueThresh` (default = 0.01): hypergeometric (or binomial) p-value cutoff for finding known motifs
+    - Determines which known motifs are shown in knownResults.html and in the {outputdir}/knownResults subdirectory
+    - Does not limit known motifs in knownResults.txt
+      - knownResults.txt simply contains statistics (e.g., P-value, Q-value, # of Target Sequences with Motif, etc.) of matching each known motif to gene set.
 
-2. How is the log-odds threshold value in motif files used by HOMER?
-   - A given sequence is considered to match a known motif if the calculated score (below) > log-odds threshold
-     $$\text{score} = \sum_{nt} \log \left( \frac{\text{observed}}{\text{expected}} \right) = \sum_{nt} \log \left( \frac{\text{probability of nt at corresponding position in motif matrix}}{0.25} \right) = \log \left( \frac{\Pi_{nt} P(\text{nt})}{0.25^{\text{length}(\text{motif})}} \right) $$
-       - $\log$ of multiplying the probability of seeing each nucleotide (nt) at each position in the motif
-       - HOMER fixes the log-odds expectation at 0.25 for each nucleotide
-   - Used to find instances of motifs (e.g. of enriched known or *de novo* motifs)
-   - Reference: [http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html](http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html)
+- How is the log-odds threshold value in motif files used by HOMER?
+  - A given sequence is considered to match a known motif if the calculated score (below) > log-odds threshold
+    $$\text{score} = \sum_{nt} \log \left( \frac{\text{observed}}{\text{expected}} \right) = \sum_{nt} \log \left( \frac{\text{probability of nt at corresponding position in motif matrix}}{0.25} \right) = \log \left( \frac{\Pi_{nt} P(\text{nt})}{0.25^{\text{length}(\text{motif})}} \right) $$
+      - $\log$ of multiplying the probability of seeing each nucleotide (nt) at each position in the motif
+      - HOMER fixes the log-odds expectation at 0.25 for each nucleotide
+  - Used to find instances of motifs (e.g. of enriched known or *de novo* motifs)
+  - Reference: [http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html](http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html)
 
-3. How are the log-odds threshold values calculated for found enriched motifs?
-   - Known motifs: log-odds threshold from the library motif files are preserved.
-   - *de novo* motifs: the threshold that results in the most significant enrichment
-     - Reference: [http://homer.ucsd.edu/homer/introduction/motifDetails.html](http://homer.ucsd.edu/homer/introduction/motifDetails.html)
+- How are the log-odds threshold values calculated for found enriched motifs?
+  - Known motifs: log-odds threshold from the library motif files are preserved.
+  - *de novo* motifs: the threshold that results in the most significant enrichment
+    - Reference: [http://homer.ucsd.edu/homer/introduction/motifDetails.html](http://homer.ucsd.edu/homer/introduction/motifDetails.html)
 
-4. How *exactly* are the hypergeometric p-values calculated?
-   - I understand that the counts of sequences with motifs are estimated (see [Usage notes](#usage)). However, the p-values I calculate using those counts is still different than what HOMER reports.
-     - Example: 
+- [Unanswered] How *exactly* are the hypergeometric p-values calculated?
+  - I understand that the counts of sequences with motifs are estimated (see [Usage notes](#usage)). However, the p-values I calculate using those counts is still different than what HOMER reports.
+    - Example: 
 
-5. To match a known motif result to the original known motif, is it sufficient to match motif name and consensus sequence (accounting for IUPAC nucleotide ambiguity codes)?
-   - In practice, this has been sufficient.
-   - Unclear if ["part 2" of motif local optimization](http://homer.ucsd.edu/homer/introduction/motifDetails.html) may change a nucleotide completely from the motif seed.
+- [Unanswered] To match a known motif result to the original known motif, is it sufficient to match motif name and consensus sequence (accounting for IUPAC nucleotide ambiguity codes)?
+  - In practice, this has been sufficient.
+  - Unclear if ["part 2" of motif local optimization](http://homer.ucsd.edu/homer/introduction/motifDetails.html) may change a nucleotide completely from the motif seed.
+
+- [Unanswered] What is the default background set?
+  - Is it just data/promoters/[species].base?
+    - What determines the genes included in data/promoters/[species].base? What is the criteria for ["typically expressed or confident promoters"](https://homer.ucsd.edu/homer/introduction/update.html)?
+
+- [Unanswered] In data/promoters/[species].pos, what does the 4th column (either 0 or 1) represent? Strand sense?
 
 ## References
 
