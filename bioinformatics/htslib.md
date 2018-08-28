@@ -52,14 +52,16 @@ Tools that require .fai FASTA indexes:
 
 Indexes
 
-**idxstats v. flagstat v. stats**
-idxstats: reference sequence name, sequence length, # mapped reads and # unmapped reads
-flagstat: N + M for each of the 12 FLAG bits, where N / M are the numbers of QC-passed/-failed reads with the FLAG set
-stats: very similar information to that of flagstat, but in a format to be plotted by plot-bamstats
+**`idxstats` v. `flagstat` v. `stats`**
+
+idxstats: reference sequence name, sequence length, # mapped reads and # unmapped reads\
+flagstat: `(N + M)` for a 13 categories (combinations of FLAGs), where `N`, `M` are counts of QC-passed/-failed reads in a given category (see [samtools doc](http://www.htslib.org/doc/samtools.html) for a description of the categories)\
+stats: similar information to that of flagstat, but in a format to be plotted by plot-bamstats
 
 **samtools v. bcftools mpileup**
-Function: almost identical. bcftools only outputs VCF/BCF files (by default, uncompressed VCF), whereas samtools can output pileup files (default)
-Arguments: very similar (see `diff` of their help outputs)
+
+Function: similar. bcftools only outputs VCF/BCF files (default: uncompressed VCF), whereas samtools can additionally output pileup files (default: pileup)\
+Arguments: very similar (see `diff` of their help outputs)\
 Indexes: same requirements; both will generate FASTA index if it does not already exist
 
 ## bcftools
