@@ -1,16 +1,18 @@
 # HOMER
 
-## Usage notes <a name="usage"></a>
+## Usage <a name="usage"></a>
 
 Finding motifs
 - log p-values outputed by findMotifs.pl in knownResults.txt or any of the \*.motif file outputs is the *natural* log p-value (source: compare p-value and log p-value of outputs)
 - The hypergeometric p-value is calculated based on *estimates* of the number of sequences containing the motif in the target and background sets. Estimates are calculated identically but separately for target and background sets.
   - Let $N$ be the number of total sequences (either in the target or background set). Let $k_i$ be the estimated number of sequences containing the motif (regardless of multiplicity) given the presence of $i$ matching instances (oligos) in $N$ total sequences. Then $k_i$ is computed recursively as
 
-    \begin{gather}
-    k_1 = 1 \\
-    k_i = k_{i-1} + \frac{N - k_{i-1}}{N}
-    \end{gather}
+    $$
+    \begin{aligned}
+    k_1 &= 1 \\
+    k_i &= k_{i-1} + \frac{N - k_{i-1}}{N}
+    \end{aligned}
+    $$
 
     This is why the "Number of Target/Background Sequences with motif" reported in homerResults/motif[#].info.html (*de novo* motifs) or knownResults.html (known motifs) are not necessarily integers and may be decimal numbers. When calcuating the hypergeometric p-value, these counts are rounded to the nearest integer.
   - Reference: [http://homer.ucsd.edu/homer/introduction/motifDetails.html](http://homer.ucsd.edu/homer/introduction/motifDetails.html)
@@ -21,10 +23,10 @@ Finding motifs
 
 Overview
 - Filename
-  - known.motifs: known motif enrichment
+  - known.motifs: used to check for known motif enrichment
     - HOMER motif library (data/knownTFs/motifs/\<mset>/\*.motif) + personal motif library (motifs/)
       - [vertebrates only] HOMER motif library = data/knownTFs/motifs/\*.motif
-  - all.motifs: check against de novo motifs
+  - all.motifs: used to check against *de novo* motifs
     - known.motifs + updated JASPAR files (update/motifs/\*/\*.motifs) + common motifs (update/motifs/common.motifs)
 - Directory
   - motifs/: custom motifs to be added to data/knownTFs/motifs by updateMotifFiles.pl
@@ -85,7 +87,9 @@ accession/: flat files for accession number conversion
 
 - How is the log-odds threshold value in motif files used by HOMER?
   - A given sequence is considered to match a known motif if the calculated score (below) > log-odds threshold
-    $$\text{score} = \sum_{nt} \log \left( \frac{\text{observed}}{\text{expected}} \right) = \sum_{nt} \log \left( \frac{\text{probability of nt at corresponding position in motif matrix}}{0.25} \right) = \log \left( \frac{\Pi_{nt} P(\text{nt})}{0.25^{\text{length}(\text{motif})}} \right) $$
+
+    $$ \text{score} = \sum_{nt} \log \left( \frac{\text{observed}}{\text{expected}} \right) = \sum_{nt} \log \left( \frac{\text{probability of nt at corresponding position in motif matrix}}{0.25} \right) = \log \left( \frac{\Pi_{nt} P(\text{nt})}{0.25^{\text{length}(\text{motif})}} \right) $$
+
       - $\log$ of multiplying the probability of seeing each nucleotide (nt) at each position in the motif
       - HOMER fixes the log-odds expectation at 0.25 for each nucleotide
   - Used to find instances of motifs (e.g. of enriched known or *de novo* motifs)
@@ -96,13 +100,15 @@ accession/: flat files for accession number conversion
   - *de novo* motifs: the threshold that results in the most significant enrichment
     - Reference: [http://homer.ucsd.edu/homer/introduction/motifDetails.html](http://homer.ucsd.edu/homer/introduction/motifDetails.html)
 
-- [Unanswered] How *exactly* are the hypergeometric p-values calculated?
-  - I understand that the counts of sequences with motifs are estimated (see [Usage notes](#usage)). However, the p-values I calculate using those counts is still different than what HOMER reports.
-    - Example: 
+- How are enriched known motifs reported?
+  - Background
+    - A [motif name in a HOMER database](http://homer.ucsd.edu/homer/motif/motifDatabase.html) consists of the transcription factor name and the source of the motif (i.e., GEO accession number or publication author). Since a transcription factor may bind multiple consensus sequences (each representing a distinct motif), distinct motifs may share the same motif name.
+    - Because of local optimization of seed motifs (see ["part 2" of motif local optimization](http://homer.ucsd.edu/homer/introduction/motifDetails.html)), a reported known motif (e.g., in knownResults.txt) may have a different consensus sequence than that of the known motif in the known motifs database (e.g., data/knownTFs/vertebrates/known.motifs).
+  - Conclusion: There is no fail-proof way to create a 1:1 mapping from enriched known motifs to the original known motif in the known motifs database. One potential solution is to filter by motif name, consensus sequence length, and then consensus sequence similarity.
 
-- [Unanswered] To match a known motif result to the original known motif, is it sufficient to match motif name and consensus sequence (accounting for IUPAC nucleotide ambiguity codes)?
-  - In practice, this has been sufficient.
-  - Unclear if ["part 2" of motif local optimization](http://homer.ucsd.edu/homer/introduction/motifDetails.html) may change a nucleotide completely from the motif seed.
+- [Unanswered] How *exactly* are the hypergeometric p-values calculated?
+  - I understand that the counts of sequences with motifs are estimated (see [Usage](#usage)). However, the p-values I calculate using those counts is still different than what HOMER reports.
+    - Example: 
 
 - [Unanswered] What is the default background set?
   - Is it just data/promoters/[species].base?
@@ -116,4 +122,3 @@ How motif libraries are used: bin/findMotifs.pl > bin/HomerConfig.pm > `checkMSe
 
 How motif libraries are constructed: update/updateMotifFiles.pl
 
-<!---  --> 
