@@ -1,5 +1,7 @@
 # Overview
 
+## Data
+
 | Format    | Name                       | Binary/compressed analog | Metadata           | Source           | References                                                                           | 
 |-----------|----------------------------|--------------------------|--------------------|------------------|--------------------------------------------------------------------------------------| 
 | SAM       | Sequence Alignment Mapping | BAM                      | @                  | bwa, bowtie2     | https://samtools.github.io/hts-specs/SAMv1.pdf                                       | 
@@ -8,6 +10,8 @@
 | GFF / GTF | General Feature Format     | n/a                      | track (unofficial) | GENCODE          | https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md          | 
 | GVF       | Genome Variation Format    | n/a                      | ##                 |                  | https://github.com/The-Sequence-Ontology/Specifications/blob/master/gvf.md           | 
 | Pileup    | Pileup                     | n/a                      | n/a                | samtools mpileup | http://samtools.sourceforge.net/pileup.shtml                                         | 
+
+## Indexes
 
 | Format  | Name               | Binary/compressed analog    | Source                  | Destination                                                            | References                           | 
 |---------|--------------------|-----------------------------|-------------------------|------------------------------------------------------------------------|--------------------------------------| 
@@ -36,5 +40,4 @@ A **template** is a physical DNA molecule put on the sequencer. Multiple **reads
 | chimeric         | supplementary  | arbitrary                    | 2048 (0x800) | hard-clipped (H) | SA             | QNAME                     | 
 | multiple mapping | primary        | typically the best alignment | 0            |                  | HI, NH         | QNAME, FLAG 0x40 and 0x80 | 
 | multiple mapping | secondary      | typically worse alignments   | 256 (0x100)  |                  | HI, NH         | QNAME, FLAG 0x40 and 0x80 | 
-
 
