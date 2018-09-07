@@ -1,5 +1,12 @@
 # HOMER
 
+- [HOMER](#homer)
+  - [Usage <a name="usage"></a>](#usage-a-name%22usage%22a)
+  - [Motif library](#motif-library)
+    - [Additional data/ files](#additional-data-files)
+  - [Questions](#questions)
+  - [References](#references)
+
 ## Usage <a name="usage"></a>
 
 Finding motifs

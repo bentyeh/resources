@@ -1,3 +1,21 @@
+- [Package notes](#package-notes)
+  - [RDAVIDWebService](#rdavidwebservice)
+  - [pheatmap](#pheatmap)
+  - [doParallel](#doparallel)
+  - [ggplot2](#ggplot2)
+  - [Graphics](#graphics)
+- [FAQ](#faq)
+  - [Miscellaneous](#miscellaneous)
+  - [Efficient code](#efficient-code)
+  - [Non-standard evaluation (NSE)](#non-standard-evaluation-nse)
+  - [Graphics](#graphics)
+- [References, Courses, Tutorials](#references-courses-tutorials)
+- [Installing R](#installing-r)
+  - [WSL](#wsl)
+    - [Upgrading R](#upgrading-r)
+    - [References](#references)
+  - [Windows](#windows)
+
 # Package notes
 
 ## RDAVIDWebService
@@ -28,31 +46,30 @@ Packages
 - **parallel**: merges functionality of **multicore** and **snow** packages
 - **doParallel**: interface between **foreach** and **parallel** packages
 
-### Backend selected by `registerDoParallel(cl, cores = NULL)`
-
-Can pass an integer to `cl` argument, and it will figure out the rest
+Backend selected by `registerDoParallel(cl, cores = NULL)`
+- Can pass an integer to `cl` argument, and it will figure out the rest
   - Not necessary to pass a cluster object, i.e. `cl = makeCluster(numNodes)`
   - If `cl` is a valid integer or a cluster object, the `cores` argument is ignored.
   - Windows: a cluster object is always created, and parallelization is implemented via the `snow` package
   - Linux
     - If `cl` is a cluster object, `snow` is used as the backend.
     - If `cl` is an integer, `multicore` is used as the backend.
+- Summary table: where `m`, `n` are integers, and `mC()` is an abbreviation for `parallel::makeCluster()`
 
-| Environment | cl    | cores | backend | threads |
-| ----------- | ----- | ----- | ------- | ------- |
-| UNIX        | NULL  | NULL  | MC      | NULL    |
-| UNIX        | m     | NULL  | MC      | m       |
-| UNIX        | mC(m) | NULL  | SNOW    | mC(m)   |
-| UNIX        | NULL  | n     | MC      | n       |
-| UNIX        | m     | n     | MC      | m       |
-| UNIX        | mC(m) | n     | SNOW    | mC(m)   |
-| Windows     | NULL  | NULL  | SNOW    | mC(3)   |
-| Windows     | m     | NULL  | SNOW    | mC(m)   |
-| Windows     | mC(m) | NULL  | SNOW    | mC(m)   |
-| Windows     | NULL  | n     | SNOW    | mC(n)   |
-| Windows     | m     | n     | SNOW    | mC(m)   |
-| Windows     | mC(m) | n     | SNOW    | mC(m)   |
-where m, n are integers, and `mC()` is an abbreviation for `parallel::makeCluster()`
+| Environment | `cl`    | `cores` | backend | threads   |
+| ----------- | ------- | ------- | ------- | --------- |
+| UNIX        | `NULL`  | `NULL`  | MC      | `NULL`    |
+| UNIX        | `m`     | `NULL`  | MC      | `m`       |
+| UNIX        | `mC(m)` | `NULL`  | SNOW    | `mC(m)`   |
+| UNIX        | `NULL`  | `n`     | MC      | `n`       |
+| UNIX        | `m`     | `n`     | MC      | `m`       |
+| UNIX        | `mC(m)` | `n`     | SNOW    | `mC(m)`   |
+| Windows     | `NULL`  | `NULL`  | SNOW    | `mC(3)`   |
+| Windows     | `m`     | `NULL`  | SNOW    | `mC(m)`   |
+| Windows     | `mC(m)` | `NULL`  | SNOW    | `mC(m)`   |
+| Windows     | `NULL`  | `n`     | SNOW    | `mC(n)`   |
+| Windows     | `m`     | `n`     | SNOW    | `mC(m)`   |
+| Windows     | `mC(m)` | `n`     | SNOW    | `mC(m)`   |
 
 References
 - Vignettes

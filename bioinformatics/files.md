@@ -1,6 +1,6 @@
 # Overview
 
-## Data
+### Data
 
 | Format    | Name                       | Binary/compressed analog | Metadata           | Source           | References                                                                           | 
 |-----------|----------------------------|--------------------------|--------------------|------------------|--------------------------------------------------------------------------------------| 
@@ -11,7 +11,7 @@
 | GVF       | Genome Variation Format    | n/a                      | ##                 |                  | https://github.com/The-Sequence-Ontology/Specifications/blob/master/gvf.md           | 
 | Pileup    | Pileup                     | n/a                      | n/a                | samtools mpileup | http://samtools.sourceforge.net/pileup.shtml                                         | 
 
-## Indexes
+### Indexes
 
 | Format  | Name               | Binary/compressed analog    | Source                  | Destination                                                            | References                           | 
 |---------|--------------------|-----------------------------|-------------------------|------------------------------------------------------------------------|--------------------------------------| 
