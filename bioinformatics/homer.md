@@ -123,6 +123,17 @@ accession/: flat files for accession number conversion
 
 - [Unanswered] In data/promoters/[species].pos, what does the 4th column (either 0 or 1) represent? Strand sense?
 
+- [Unanswered] Define the following variables based on HOMER's output (i.e., from `knownResults.txt` and/or parsing `homerMotifs.all.motifs`):
+  
+  $$\begin{aligned}
+  x_\text{target} &= \frac{\text{\# of Target Sequences with Motif}}{\text{\% of Target Sequences with Motif}} \times 100 \\
+  y_\text{target} &= \text{round}(x_\text{target}) \\
+  x_\text{background} &= \frac{\text{\# of Background Sequences with Motif}}{\text{\% of Background Sequences with Motif}} \times 100 \\
+  y_\text{background} &= \text{round}(x_\text{background})
+  \end{aligned}$$
+  
+  If we plot $\text{hist}(x_\text{target}-y_\text{target})$, we see a large peak around $0$ and very few values elsewhere in $[-0.5, 0.5]$. If we plot $\text{hist}(x_\text{background}-y_\text{background})$, we see essentially a uniform distribution in $[-0.5, 0.5]$. Why are the distributions different?
+
 ## References
 
 How motif libraries are used: bin/findMotifs.pl > bin/HomerConfig.pm > `checkMSet()`

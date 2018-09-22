@@ -101,6 +101,12 @@ Statistical transformations
 
 ## Miscellaneous
 - Help documentation for special binary operators: `?"%op%"` or `help("%op%")`
+- Comparisons:
+  - `if` statements: use `identical()` instead of `==` or `!=`, which may return `NA` values
+  - Numerical and complex values: `identical(all.equal(x,y), TRUE)`
+  - See `?Comparison` or https://stat.ethz.ch/R-manual/R-devel/library/base/html/Comparison.html
+
+These operators are sometimes called as functions as e.g. `<`(x, y): see the description of how argument-matching is done in Ops. 
 
 ## Efficient code
 Code profiling
@@ -119,6 +125,11 @@ Specific examples
     | 5    | `df[r,c]`                                 | logical    | logical              |
     | 6    | `df %>% filter(r) %>% dplyr::select(!!c)` | logical    | character            |
     | 7    | `subset(df, r, c)`                        | logical    | character or logical |
+
+- Converting string to vector of characters
+  1. `strsplit(string, "")[[1]]`
+  2. `scan(text = gsub("(.)", "\\1 ", string), what = character())`
+  3. `substring(string, 1:nchar(string), 1:nchar(string))`
 
 ## Non-standard evaluation (NSE)
 Guides / tutorials
