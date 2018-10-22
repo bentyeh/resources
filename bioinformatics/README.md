@@ -10,6 +10,17 @@
 
 - [UCSD Bioinformatics Specialization](https://www.coursera.org/specializations/bioinformatics)
 
+# Tutorials
+
+Harvard Chan Bioinformatics Core Training
+- [In-depth NGS Data Analysis Course](https://github.com/hbctraining/In-depth-NGS-Data-Analysis-Course)
+  - Differential gene expression analysis
+  - Functional analysis and other RNA-seq applications
+  - ChIP-seq
+  - Variant calling
+
+Griffith Lab RNA-Seq Wiki: https://github.com/griffithlab/rnaseq_tutorial/wiki
+
 # Pipelines
 
 [Bioconductor Workflows](https://www.bioconductor.org/packages/release/BiocViews.html#___Workflow)
