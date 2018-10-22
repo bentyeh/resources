@@ -140,3 +140,26 @@ How motif libraries are used: bin/findMotifs.pl > bin/HomerConfig.pm > `checkMSe
 
 How motif libraries are constructed: update/updateMotifFiles.pl
 
+## Changes to default 4.10 installation
+
+Configuration
+- Human promoters: `perl configureHomer.pl -install human-p`
+- Update motif library: run update/updateMotifFiles.pl
+
+Code
+- bin/compareMotifs.pl: output proper HTML close tags
+  - line 711: `<TR><TD>Score:</TD><TD>$score</TD></TR>` -- added ">" after `$score</TD`
+  - line 712: `<TR><TD>Offset:</TD><TD>$matches->[$i]->{'offset'}</TD></TR>i` -- added ">" after `{'offset'}</TD`
+- update/updateMotifFiles.pl
+  - use latest JASPAR 2018 CORE PFMs (Position Frequency Matrices)
+  - print to STDERR before it downloads JASPAR 2018 CORE PFMs
+
+Library
+- Renamed motifs/rorgt.motif to motifs/rorc.motif. Removed rorgt.motif from data/knownTFs/motifs.
+  - motifs/rorgt.motif and data/knownTFs/motifs/rorc.motif were identical files.
+  - motifs/rorgt.motif was copied over to data/knownTFs/motifs/ by update/updateMotifFiles.pl
+- data/knownTFs/motifs/table.txt
+  - removed extra tab ('\t') in line 311 (zpf3.motif) between last columns
+- Renamed all instances of "ChIPSeq" to "ChIP-Seq" in all motif and related files
+  - `find motifs/ -type f | xargs sed -i  's/ChIPSeq/ChIP-Seq/g'`
+  - `find data/knownTFs/ -type f | xargs sed -i  's/ChIPSeq/ChIP-Seq/g'`
