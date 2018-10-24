@@ -10,6 +10,8 @@
 
 - [UCSD Bioinformatics Specialization](https://www.coursera.org/specializations/bioinformatics)
 
+[UCR GEN242: Data Analysis in Genome Biology](http://girke.bioinformatics.ucr.edu/GEN242/index.html)
+
 # Tutorials
 
 Harvard Chan Bioinformatics Core Training
@@ -18,6 +20,7 @@ Harvard Chan Bioinformatics Core Training
   - Functional analysis and other RNA-seq applications
   - ChIP-seq
   - Variant calling
+
 
 Griffith Lab RNA-Seq Wiki: https://github.com/griffithlab/rnaseq_tutorial/wiki
 
