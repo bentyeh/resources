@@ -4,6 +4,10 @@
   - [doParallel](#doparallel)
   - [ggplot2](#ggplot2)
   - [Graphics](#graphics)
+- [Bioconductor](#bioconductor)
+  - [Infrastructure](#infrastructure)
+    - [Hierarchy](#hierarchy)
+  - [GenomicRanges](#genomicranges)
 - [FAQ](#faq)
   - [Miscellaneous](#miscellaneous)
   - [Efficient code](#efficient-code)
@@ -97,16 +101,120 @@ Statistical transformations
 - Grid graphics
   - [Getting to Know Grid Graphics](https://www.stat.auckland.ac.nz/~paul/useR2015-grid/)
 
+# Bioconductor
+
+## Infrastructure
+
+### Hierarchy
+
+(virtual) S4Vectors::Vector
+- (virtual) S4Vectors::List
+  - S4Vectors::Rle
+  - S4Vectors::DataFrame
+  - (virtual) IRanges::Ranges
+    - (virtual) IRanges::IntegerRanges
+      - IRanges::IRanges
+      - IRanges::Views
+    - (virtual) GenomicRanges::GenomicRanges
+      - GenomicRanges::GRanges
+  - (virtual) IRanges::RangesList
+    - (virtual) IRanges::IntegerRangesList
+      - IRanges::IRangesList
+    - (virtual) GenomicRanges::GenomicRangesList
+      - GenomicRanges::GRangesList
+  - (virtual) XVector::XVectorList
+    - (virtual) Biostrings::XStringSet
+      - Biostrings::BStringSet
+      - Biostrings::DNAStringSet
+      - Biostrings::RNAStringSet
+      - Biostrings::AAStringSet
+      - (virtual) Biostrings::QualityScaledXStringSet
+        - Biostrings::QualityScaledBStringSet
+        - Biostrings::QualityScaledDNAStringSet
+        - Biostrings::QualityScaledRNAStringSet
+        - Biostrings::QualityScaledAAStringSet
+      - (virtual) Biostrings::XStringQuality
+        - Biostrings::PhredQuality
+        - Biostrings::SolexaQuality
+        - Biostrings::IlluminaQuality
+
+Properties of S4Vectors::List
+- Single-bracket subsetting: `[`
+  - Example: Consider an XStringSet (`testSeqs`), IRanges (`ir`), and GRanges (`gr`)
+    ```{r}
+    testSeqs <- BStringSet(c("abcdefgh", "ijklmnop", "q", "r", "s", "t"))
+    names(testSeqs) <- c("seq1", "seq2", "seq3", "seq4", "seq5", "seq6")
+
+    ir <- IRanges(start = c(1, 4, 6), width = c(2, 1, 1))
+    gr <- GRanges(seqnames = c("seq1", "seq2", "seq2"), ranges = ir)
+
+    testSeqs[ir]
+    testSeqs[gr]
+    ```
+    - Subset XStringSet by IRanges --> XStringSet of length `sum(width(ir))`
+      - Subset XStringSet by indexes within IRanges
+    - Subset XStringSet by GRanges --> XStringSet of length `length(gr)`
+      - Element-wise subsetting: each element is a string from the corresponding `seqnames` sequence subset by the corresponding start-end range.
+      - Requires that the XStringSet has `names` attribute.
+- Looping
+  - `aggregate()`: combine sequence extraction with `sapply`
+  - `endoapply()`: endomorphic equivalent of `lapply`, i.e., i.e. it returns a `S4Vectors::List` derivative of the same class as the input rather than a `base::list` object.
+- Annotations
+  - Metadata about the object as a whole
+    - Representation: `base::list`
+    - Accessor: `metadata()`
+  - Metadata about the individual elements of the object
+    - Representation: `S4Vectors::DataFrame`
+    - Accessor: `mcols()` 
+
+Ranges and RangesList methods
+- Accessors: `start`, `end`, `width`
+- Coercion
+  - `as.data.frame([RangesList])`
+  - `as(from, "IRanges")`
+- Vector operations: 
+- Range-based operations
+  - Intra-range transformations: transform each range individually
+    - `shift`, `narrow`, `resize`, `flank`, `promoters`, `reflect`, `restrict`
+  - Inter-range transformations: transform all the ranges together as a set to produce a new set of ranges
+    - `range`, `reduce`, `gaps`, `disjoin`, `disjointBins`
+  - Set operations: `union`, `intersect`, `setdiff`
+  - Coverage and slicing: `coverage`, `slice`
+  - Overlaps: `findOverlaps`, `countOverlaps`
+- [RangesList] List operations: `elementNROWS`, `unlist`, `relist`, `endoapply`
+  - `unlist(rList)` is equivalent to `c(rList[[1]], rlist[[2]], ...)`
+  - `relist(data, template)` returns a list-like object with the same "shape" as `template`, filled by `data`
+
+## GenomicRanges
+
+How-To
+- Saving/Importing `GRanges` object as/to CSV:
+  - Converting to data.frame: `as.data.frame(<GRanges object>)`
+    - Loses any `seqinfo`
+  - Converting to GRanges
+    - data.frame: `as(<data.frame object>, "GRanges")`
+    - DataFrame: `makeGRangesFromDataFrame(df, ...)`
+- Changing the number of rows of a `GRanges` object displayed via `print()` or `show()`
+  ```{r}
+  options("showHeadLines" = <value>)
+  options("showTailLines" = <value>)
+  ```
+
+
 # FAQ
 
 ## Miscellaneous
 - Help documentation for special binary operators: `?"%op%"` or `help("%op%")`
-- Comparisons:
+- Tools for S4 classes
+  - `showClass("class")`: information about a class definition, including inheritance hierarchy
+  - `showMethods("class")`: show all methods
+  - `class?<class_name>` or `` ?`<class_name>-class` ``: access help documentation about a class
+- Comparisons
   - `if` statements: use `identical()` instead of `==` or `!=`, which may return `NA` values
   - Numerical and complex values: `identical(all.equal(x,y), TRUE)`
   - See `?Comparison` or https://stat.ethz.ch/R-manual/R-devel/library/base/html/Comparison.html
 
-These operators are sometimes called as functions as e.g. `<`(x, y): see the description of how argument-matching is done in Ops. 
+These operators are sometimes called as functions as e.g. `<(x, y)`: see the description of how argument-matching is done in Ops. 
 
 ## Efficient code
 Code profiling
