@@ -1,5 +1,7 @@
 # Courses
 
+[Stanford BIOS 221: Modern Statistics for Modern Biology](http://web.stanford.edu/class/bios221/book/introduction.html)
+
 [HarvardX Biomedical Data Science Open Online Training](https://rafalab.github.io/pages/harvardx.html)
 - Textbook: [HarvardX PH525x series - Biomedical Data Science](https://genomicsclass.github.io/book/)
 

@@ -6,6 +6,7 @@
     - [Additional data/ files](#additional-data-files)
   - [Questions](#questions)
   - [References](#references)
+  - [Changes to default 4.10 installation](#changes-to-default-410-installation)
 
 ## Usage <a name="usage"></a>
 

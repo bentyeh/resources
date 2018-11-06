@@ -101,13 +101,3 @@ Theorem: This procedure results in a FDR of $E(Q) = \frac{m_0}{m} \alpha^*$
 Properties
 - Estimated $q$-values are increasing in the same order as the $p$-values.
 - A procedure that rejects hypotheses with $q$-values < $\alpha^*$ controls the FDR error rate at $\alpha^*$.
-
-# Miscellaneous
-
-Conditional Probability
-$$P(A \cap B \mid C) = P(A \mid B \cap C) P(B \mid C)$$
-
-# Questions
-
-1. Explain: For tests where the null hypothesis is true, the individual P-values have uniform distribution. Source: Ewens, Statistics for Biology and Health, 2nd Edition. Page 460.
-
