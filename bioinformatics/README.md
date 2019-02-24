@@ -30,7 +30,19 @@ Griffith Lab RNA-Seq Wiki: https://github.com/griffithlab/rnaseq_tutorial/wiki
 
 [Bioconductor Workflows](https://www.bioconductor.org/packages/release/BiocViews.html#___Workflow)
 
-## References
+# Miscellaneous
+
+Mapping IDs
+- UniProt ID mapping seems pretty incomplete, especially for UniProt <-> Ensembl Peptide/Transcript IDs
+  - UniProt mapping associated with reference proteome: ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640_9606.idmapping.gz
+  - UniProt mapping by organism: ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
+
+Canonical transcripts and proteins for a given gene
+- UniProt reference proteome
+- UCSC knownCanonical track
+- https://groups.google.com/a/soe.ucsc.edu/forum/#!msg/genome/_6asF5KciPc/bWn4g3vCFAAJ
+
+# References
 Consortia
 - [ENCODE](https://www.encodeproject.org/pipelines/)
 - [National Cancer Institute (NCI) Genomic Data Commons (GDC)](https://docs.gdc.cancer.gov/Data/Introduction/)
