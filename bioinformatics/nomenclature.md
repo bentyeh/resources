@@ -13,3 +13,4 @@ Nucleotide strand sense
 - [Context: transcription](https://www.ncbi.nlm.nih.gov/mesh/68016373)
   - Sense / coding: same sequence as the mRNA transcript
   - Antisense / template: template for mRNA synthesis
+  - Also applies to context of single-stranded RNA viral genomes
