@@ -12,13 +12,14 @@
   - [Miscellaneous](#miscellaneous)
   - [Efficient code](#efficient-code)
   - [Non-standard evaluation (NSE)](#non-standard-evaluation-nse)
-  - [Graphics](#graphics)
+  - [Graphics](#graphics-1)
 - [References, Courses, Tutorials](#references-courses-tutorials)
 - [Installing R](#installing-r)
   - [WSL](#wsl)
     - [Upgrading R](#upgrading-r)
     - [References](#references)
   - [Windows](#windows)
+  - [Linux](#linux)
 
 # Package notes
 
@@ -295,3 +296,23 @@ Specific plots
 ## Windows
 
 Rtools: https://cran.r-project.org/bin/windows/Rtools/
+
+## Linux
+
+If installed in a `conda` environment, it may cause the `pager` command to behave unexpectedly.
+- Background
+  - By default, `pager` just redirects to `less`: `/usr/bin/pager -> /etc/alternatives/pager -> /bin/less`
+  - `pager` is used by utilities such as `man`
+    - `man` takes an option `-P pager` that specifies a pager to use, which defaults to `$MANPAGER`, `$PAGER`, or `cat` (in that order)
+- Problem: Installing R and related packages adds `pager -> ../lib/R/bin/pager` to `<conda_install_dir>/envs/<env_name>/bin/`. Activating `env_name` adds `<conda_install_dir>/envs/<env_name>/bin/` to `$PATH`, redirecting `pager` to `<conda_install_dir>/envs/<env_name>/lib/R/bin/pager` instead of `less`.
+  - `../lib/R/bin/pager` is a super short shell script that executes `$PAGER` with any arguments passed
+    - Unclear what its purpose is. The comments in the script indicate that `$PAGER` is determined at configure time and recorded in `<conda_install_dir>/envs/<env_name>/etc/Renviron`, but `etc/Renviron` does not necessarily exist.
+      - The Renviron file is used to store system variables, such as the the `R_LIBS` path: `R_LIBS=~/R/library`. See https://csgillespie.github.io/efficientR/3-3-r-startup.html#renviron or https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html.
+  - It is still unclear which conda package (whether R itself or an R package, such as r-tidyverse) introduces this issue.
+- Workarounds
+  - `man`-specific
+    - Specify the `-P pager` option each time you use `man`
+    - Set `$MANPAGER` upon activation of the environment. See https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables
+  - generic, may affect R behavior
+    - Set `$PAGER` upon activation of the environment. See https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables
+    - Remove the new `pager` script installed by conda: `rm <conda_install_dir>/envs/<env_name>/bin/pager`
