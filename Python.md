@@ -1,3 +1,11 @@
+# Packages
+
+## Numpy
+
+NumPy array broadcasting tutorial: https://jakevdp.github.io/PythonDataScienceHandbook/02.05-computation-on-arrays-broadcasting.html
+
+# Environments
+
 ## Jupyter Notebooks
 
 ### Installing multiple kernels
