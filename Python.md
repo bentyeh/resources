@@ -1,3 +1,25 @@
+# Python Notes
+- [Python Notes](#python-notes)
+- [Base Python](#base-python)
+    - [Two ways to call a method](#two-ways-to-call-a-method)
+- [Packages](#packages)
+  - [Numpy](#numpy)
+- [Environments](#environments)
+  - [Jupyter Notebooks](#jupyter-notebooks)
+    - [Installing multiple kernels](#installing-multiple-kernels)
+    - [NBConvert](#nbconvert)
+      - [Hiding cells from output](#hiding-cells-from-output)
+      - [Saving to PDF](#saving-to-pdf)
+
+# Base Python
+
+### Two ways to call a method
+
+Let `obj = myClass()` be an instance of a `myClass` object, which defines a `myMethod()` method. Then the following statements are equivalent:
+1. `obj.myMethod()`
+2. `myClass.myMethod(obj)`
+   - This statement makes it clear that `obj` is passed into the method as the `self` argument.
+
 # Packages
 
 ## Numpy
