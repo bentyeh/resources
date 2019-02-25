@@ -41,3 +41,27 @@ A **template** is a physical DNA molecule put on the sequencer. Multiple **reads
 | multiple mapping | primary        | typically the best alignment | 0            |                  | HI, NH         | QNAME, FLAG 0x40 and 0x80 | 
 | multiple mapping | secondary      | typically worse alignments   | 256 (0x100)  |                  | HI, NH         | QNAME, FLAG 0x40 and 0x80 | 
 
+# File format conversions
+
+## VCF/BCF
+
+VCF to BCF: `bcftools view -Ob -o output.bcf.gz input.vcf[.gz]`\
+BCF to VCF: `bcftools view -Ov -o output.vcf input.bcf[.gz]`\
+
+## SAM/BAM
+
+SAM to BAM: `samtools view -b -o output.bam input.sam`\
+BAM to SAM: `samtools view -o output.sam input.bam`\
+BAM to FASTA/Q: `samtools <fasta | fastq> -0 READ_OTHER_FILE -1 READ1_FILE -2 READ2_FILE input.bam`
+
+## BAM to VCF
+
+Assumptions
+- BAM is sorted
+- BAM index aln.bam.bai exists
+- Reference FASTA ref.fa.fai exists
+
+BAM to pileup: `samtools mpileup -f ref.fa -o aln.pileup aln.bam`\
+BAM to VCF (genotype likelihoods): `bcftools mpileup -Ov -f ref.fa -o likelihoods.vcf aln.bam`\
+BAM to VCF (called variants): `bcftools mpileup -Ou -f ref.fa aln.bam | bcftools call -mv -Ob -o calls.bcf`
+
