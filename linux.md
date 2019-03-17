@@ -44,15 +44,16 @@ Given
     - `<host>` may also be a network address (e.g., if `<remote>` is a login node and `<host>` is a compute node)
       - Firewalls may limit the range of accessible `<host_port>` numbers (e.g., on wheat and oat Farmshare nodes, `<host_port>` needs to be > 32768)
 - `-N`: do not execute a remote command
+- `-f`: go to background just before command execution
 
 Direct port forwarding: `ssh -N -L [bind:]<loc_port>:<host>:<host_port> <user>@<remote>`
 - Example: forward localhost:8889 to rice05:50000
-    ```ssh -N -L localhost:8889:localhost:50000 bentyeh@rice05.stanford.edu```
+    ```ssh -Nf -L localhost:8889:localhost:50000 bentyeh@rice05.stanford.edu```
 - Example: forward localhost:8889 to wheat16:50000 through rice05
-    ```ssh -N -L localhost:8889:wheat16.stanford.edu:50000 bentyeh@rice05.stanford.edu```
+    ```ssh -Nf -L localhost:8889:wheat16.stanford.edu:50000 bentyeh@rice05.stanford.edu```
 
-Multiple hop port forwarding: `ssh -L [bind:]<loc_port>:<middle_host>:<middle_port> <user>@<middle_host> -N -L <middle_port>:<host>:<host_port> <remote>`
+Multiple hop port forwarding: `ssh -L [bind:]<loc_port>:<middle_host>:<middle_port> <user>@<middle_host> ssh -N -L <middle_port>:<host>:<host_port> <remote>`
 - Does not work if two-factor authentication is required between `<middle_host>` and `<remote>` (e.g., on Farmshare)
-- Example: forward localhost:8889 through sh-ln03:40000 to sh-08-25.int:50000
-  ```ssh -L localhost:8889:localhost:40000 bentyeh@login.sherlock.stanford.edu ssh -N -L 40000:localhost:50000 sh-08-25.int```
+- Example: forward localhost:8889 through login.sherlock.stanford.edu:40000 to sh-08-25.int:50000
+  ```ssh -f -L localhost:8889:localhost:40000 bentyeh@login.sherlock.stanford.edu ssh -N -L 40000:localhost:50000 sh-08-25.int```
 
