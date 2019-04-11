@@ -268,18 +268,28 @@ Specific plots
   - [Joining a dendrogram and a heatmap](https://stackoverflow.com/questions/42047896/joining-a-dendrogram-and-a-heatmap/42596935): ggdenro for creating the dendrogram, ggplot2 for creating the heatmap, cowplot for arranging plots
   - [Clusters and Heatmaps](https://jcoliver.github.io/learn-r/008-ggplot-dendrograms-and-heatmaps.html): ggdenro for creating the dendrogram, ggplot2 for creating the heatmap, grid for arranging plots
 
-# References, Courses, Tutorials
+# References
 
+Data Science
+- [Hadley Wickham - R for Data Science](http://r4ds.had.co.nz/)
+- Data visualization
+  - [Stanford Data Challenge Lab - Data Visualization](https://dcl-data-vis.stanford.edu/)
+
+Manuals
 - [CRAN R Manuals: An Introduction to R](https://cran.r-project.org/doc/manuals/r-release/R-intro.html)
 - [Hadley Wickham - Advanced R](https://adv-r.hadley.nz/)
 - [Hadley Wickham - R packages](http://r-pkgs.had.co.nz/)
 - [Cookbook for R](http://www.cookbook-r.com/)
+
+Courses
 - [Tidyverse-suggested university courses](https://www.tidyverse.org/learn/#university-courses)
   - [Stanford Data Challenge Lab](https://dcl-2017-04.github.io/curriculum/)
 - [Stanford STATS 101: Data Science 101](http://web.stanford.edu/class/stats101/)
 - [Stanford STATS/CME 195: Introduction to R](http://web.stanford.edu/~msesia/stats195/)
-- [Hadley Wickham - R for Data Science](http://r4ds.had.co.nz/)
-- [Google Style Guide](https://google.github.io/styleguide/Rguide.xml)
+
+Style
+- [The tidyverse style guide](https://style.tidyverse.org/)
+- [Google's R Style Guide](https://google.github.io/styleguide/Rguide.xml)
 
 # Installing R
 
