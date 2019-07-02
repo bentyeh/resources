@@ -22,6 +22,25 @@ Pipe stdout to a command that normally reads from a file
   - Examples: tar, sed, sort
   - See https://www.gnu.org/software/coreutils/manual/coreutils.html#Common-options
 
+## Startup Files
+
+| login | interactive | .bashrc   | .bash_profile* | example situation                        | example command                    | bash options | 
+|-------|-------------|-----------|----------------|------------------------------------------|------------------------------------|--------------| 
+| no    | no          | no        | no             | running a script                         | `bash myscript.sh`                 | `bash -c`    | 
+| no    | yes         | yes       | no             | launching a new shell                    | `screen`                           | `bash`       | 
+| yes   | no          | usually** | yes            | non-interactive login to remote computer | `ssh sherlock "echo hi > tmp.txt"` | `bash -l -c` | 
+| yes   | yes         | usually** | yes            | interactive login to remote computer     | `ssh sherlock`                     | `bash -l`    | 
+
+\* Bash looks for \~/.bash_profile, \~/.bash_login, and \~/.profile, in that order, and executes commands from the first one that exists.
+\*\* By default in Ubuntu, .bashrc is sourced by .profile but exits immediately if the shell is not run interactively.
+
+Default startup files are stored in the directory /etc/skel/ and are copied to a new user's home directory when such user is created by the `useradd` program.
+
+References
+- [Bash Manual: 6.2 Bash Startup Files](https://www.gnu.org/software/bash/manual/bash.html#Bash-Startup-Files)
+- [Ask Ubuntu: Differentiate login and interactive shells](https://askubuntu.com/questions/879364/differentiate-interactive-login-and-non-interactive-non-login-shell)
+- [/etc/skel/ directory](http://www.linfo.org/etc_skel.html)
+
 # Text processing
 
 GNU Coreutils manual: https://www.gnu.org/software/coreutils/manual/coreutils.html
@@ -57,3 +76,25 @@ Multiple hop port forwarding: `ssh -L [bind:]<loc_port>:<middle_host>:<middle_po
 - Example: forward localhost:8889 through login.sherlock.stanford.edu:40000 to sh-08-25.int:50000
   ```ssh -f -L localhost:8889:localhost:40000 bentyeh@login.sherlock.stanford.edu ssh -N -L 40000:localhost:50000 sh-08-25.int```
 
+## Multiplexing
+
+How to avoid authentication each time you log in?
+- Add the following lines to `~/.ssh/config` on your local machine (i.e., laptop):
+  ```
+  Host <hostname, e.g., login.sherlock.stanford.edu>
+    ControlMaster auto
+    ControlPersist yes
+    ControlPath ~/.ssh/%l%r@%h:%p
+  ```
+- To control an active connection multiplexing process: `ssh -O <ctl_cmd> <host>`
+  - `<ctl_cmd>`
+    - `check`: check that the master process is running
+    - `stop`: request the master to stop accepting further multiplexing requests
+    - `exit`: request the master to exit
+  - Example: `ssh -O check sherlock`
+- References:
+  - [Stanford Farmshare: Connecting](https://srcc.stanford.edu/farmshare2/connecting)
+  - [Stanford Sherlock: Avoiding Multiple Duo Prompts](https://www.sherlock.stanford.edu/docs/advanced-topics/connection/#avoiding-multiple-duo-prompts)
+  - [Stanford Farmshare: Advanced Connection Options](https://web.stanford.edu/group/farmshare/cgi-bin/wiki/index.php/Advanced_Connection_Options)
+  - [Wikibooks: OpenSSH Cookbook - Multiplexing](https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing)
+  - [OpenSSH client configuration manual](https://man.openbsd.org/ssh_config)
