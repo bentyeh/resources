@@ -29,3 +29,16 @@ Resources
 - [UCSD Center for Computational Mass Spectrometry](http://proteomics.ucsd.edu/)
   - [Global Natural Products Social Molecular Networking (GNPS)](https://ccms-ucsd.github.io/GNPSDocumentation/): a web-based mass spectrometry ecosystem that aims to be an open-access knowledge base for community-wide organization and sharing of raw, processed or identified tandem mass (MS/MS) spectrometry data
 - [MS Imaging](https://ms-imaging.org/wp/): a site dedicated to sharing knowledge on mass spectrometry imaging
+
+## Databases
+
+Spectral Database for Organic Compounds (SDBS)
+- National Institute of Advanced Industrial Science and Technology (AIST), Japan
+- https://sdbs.db.aist.go.jp/sdbs/cgi-bin/direct_frame_top.cgi
+
+MassBank
+- Mass Spectrometry Society of Japan
+- http://www.massbank.jp/Search
+
+Mass Bank of North America (MoNA)
+- http://mona.fiehnlab.ucdavis.edu/
