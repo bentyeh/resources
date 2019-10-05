@@ -1,25 +1,26 @@
-- [Package notes](#package-notes)
-  - [RDAVIDWebService](#rdavidwebservice)
+- [Package notes](#Package-notes)
+  - [RDAVIDWebService](#RDAVIDWebService)
   - [pheatmap](#pheatmap)
-  - [doParallel](#doparallel)
+  - [doParallel](#doParallel)
   - [ggplot2](#ggplot2)
-  - [Graphics](#graphics)
-- [Bioconductor](#bioconductor)
-  - [Infrastructure](#infrastructure)
-    - [Hierarchy](#hierarchy)
-  - [GenomicRanges](#genomicranges)
-- [FAQ](#faq)
-  - [Miscellaneous](#miscellaneous)
-  - [Efficient code](#efficient-code)
-  - [Non-standard evaluation (NSE)](#non-standard-evaluation-nse)
-  - [Graphics](#graphics-1)
-- [References, Courses, Tutorials](#references-courses-tutorials)
-- [Installing R](#installing-r)
-  - [WSL](#wsl)
-    - [Upgrading R](#upgrading-r)
-    - [References](#references)
-  - [Windows](#windows)
-  - [Linux](#linux)
+  - [Graphics](#Graphics)
+  - [msa](#msa)
+- [Bioconductor](#Bioconductor)
+  - [Infrastructure](#Infrastructure)
+    - [Hierarchy](#Hierarchy)
+  - [GenomicRanges](#GenomicRanges)
+- [FAQ](#FAQ)
+  - [Miscellaneous](#Miscellaneous)
+  - [Efficient code](#Efficient-code)
+  - [Non-standard evaluation (NSE)](#Non-standard-evaluation-NSE)
+  - [Graphics](#Graphics-1)
+- [References](#References)
+- [Installing R](#Installing-R)
+  - [WSL](#WSL)
+    - [Upgrading R](#Upgrading-R)
+    - [References](#References-1)
+  - [Windows](#Windows)
+  - [Linux](#Linux)
 
 # Package notes
 
@@ -76,6 +77,8 @@ Backend selected by `registerDoParallel(cl, cores = NULL)`
 | Windows     | `m`     | `n`     | SNOW    | `mC(m)`   |
 | Windows     | `mC(m)` | `n`     | SNOW    | `mC(m)`   |
 
+The number of CPUs the current process can use (as opposed to the number of CPUs in the system) can be obtained with `length(parallel::mcaffinity())` (analogous to `len(os.sched_getaffinity(0))` on Python).
+
 References
 - Vignettes
   - **parallel**: http://stat.ethz.ch/R-manual/R-devel/library/parallel/doc/parallel.pdf
@@ -101,6 +104,10 @@ Statistical transformations
 ## Graphics
 - Grid graphics
   - [Getting to Know Grid Graphics](https://www.stat.auckland.ac.nz/~paul/useR2015-grid/)
+
+## msa
+
+`msa` is *not* simply a wrapper around original alignment tool binaries (MUSCLE, Clustal Omega, ClustalW). Rather, it extends the original source code, and the custom C++ code is compiled *with* the original source code. Consequently, it is difficult to reproduce alignment results produced by `msa` by passing similar arguments to the original alignment tool binaries.
 
 # Bioconductor
 

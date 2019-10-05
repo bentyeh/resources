@@ -53,6 +53,8 @@ Given
 
 # OpenSSH
 
+Options can be either given on the command line when invoking `ssh` (see `man ssh`) or in a user configuration file at `~/.ssh/config` (see `man ssh_config`).
+
 ## Port forwarding
 
 `ssh` options
@@ -98,3 +100,10 @@ How to avoid authentication each time you log in?
   - [Stanford Farmshare: Advanced Connection Options](https://web.stanford.edu/group/farmshare/cgi-bin/wiki/index.php/Advanced_Connection_Options)
   - [Wikibooks: OpenSSH Cookbook - Multiplexing](https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing)
   - [OpenSSH client configuration manual](https://man.openbsd.org/ssh_config)
+
+## X11 forwarding
+
+Options
+- `-C`: gzip-compress all traffic - desirable on slower networks
+- `-X`: Enables X11 forwarding
+- `-Y`: Enables trusted X11 forwarding. This is *less secure* than `-X` but may be required for compatibility. On Debian (e.g., Ubuntu) systems, `-X` defaults to `-Y`.
