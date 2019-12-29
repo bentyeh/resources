@@ -1,26 +1,81 @@
-- [Package notes](#Package-notes)
-  - [RDAVIDWebService](#RDAVIDWebService)
+- [Base R](#base-r)
+  - [Modeling](#modeling)
+    - [Simple model](#simple-model)
+    - [Interactions and Linearity](#interactions-and-linearity)
+- [Package notes](#package-notes)
+  - [RDAVIDWebService](#rdavidwebservice)
   - [pheatmap](#pheatmap)
-  - [doParallel](#doParallel)
+  - [doParallel](#doparallel)
   - [ggplot2](#ggplot2)
-  - [Graphics](#Graphics)
+  - [Graphics](#graphics)
   - [msa](#msa)
-- [Bioconductor](#Bioconductor)
-  - [Infrastructure](#Infrastructure)
-    - [Hierarchy](#Hierarchy)
-  - [GenomicRanges](#GenomicRanges)
-- [FAQ](#FAQ)
-  - [Miscellaneous](#Miscellaneous)
-  - [Efficient code](#Efficient-code)
-  - [Non-standard evaluation (NSE)](#Non-standard-evaluation-NSE)
-  - [Graphics](#Graphics-1)
-- [References](#References)
-- [Installing R](#Installing-R)
-  - [WSL](#WSL)
-    - [Upgrading R](#Upgrading-R)
-    - [References](#References-1)
-  - [Windows](#Windows)
-  - [Linux](#Linux)
+- [Bioconductor](#bioconductor)
+  - [Infrastructure](#infrastructure)
+    - [Hierarchy](#hierarchy)
+  - [GenomicRanges](#genomicranges)
+- [FAQ](#faq)
+  - [Miscellaneous](#miscellaneous)
+  - [Efficient code](#efficient-code)
+  - [Non-standard evaluation (NSE)](#non-standard-evaluation-nse)
+  - [Graphics](#graphics-1)
+- [References](#references)
+- [Installing R](#installing-r)
+  - [WSL](#wsl)
+    - [Upgrading R](#upgrading-r)
+    - [References](#references-1)
+  - [Windows](#windows)
+  - [Linux](#linux)
+
+# Base R
+
+## Modeling
+
+### Simple model
+
+Consider a simple linear model
+
+$$y = \beta_0 + x_1 \beta_1$$
+
+- $y$: experimental measurement of interest (say, RNA-seq counts of a given gene)
+- $x_1$: factor indicating the condition (e.g., treatment versus control) of a sample
+- $\beta_0$: intercept
+- $\beta_1$: slope
+
+If there are only two conditions, then $x_1$ becomes a binary indicator variable
+
+$$x_1 = \begin{cases} 0, &\text{control} \\ 1, &\text{treatment} \end{cases}$$
+
+and we can interpret $\beta_0$ as the base level of the measurement in the control condition and $\beta_1$ as the difference between treatment and control.
+
+However, what if there are more than 2 conditions? What if $x_1$ is a factor representing, say, 10 different treatment conditions? Since we want to estimate a different effect from each condition, each condition gets its own "slope" parameter.
+
+Let $C$ be the set of conditions, $\beta_c$ be the slope parameter for a particular condition $c \in C$, and $\delta(a, b)$ be an indicator function that evaluates to $1$ if $a$ and $b$ are identical and $0$ otherwise. Our linear model can be expressed in two (of many) ways:
+
+1. We do not consider the control condition distinctly from treatment conditions:
+    - $\beta_c$ represents the experimental measurement resulting from treatment condition $c$
+  $$y = f(x_1) = \sum_{c \in C} \beta_c \delta(c, x_1)$$
+2. Consider treatment conditions relative to a control condition (control condition denoted by $c = 0$):
+    - $\beta_c$ represents the difference in experimental measurement between treatment condition $c$ and control
+  $$y = f(x_1) = \beta_0 + \sum_{c \neq 0} \beta_c \delta(c, x_1)$$
+
+### Interactions and Linearity
+
+Consider two distinct sample-level covariates $x_1$ (e.g., cell line) and $x_2$ (e.g., drug treatment). Then
+$$y = f(x_1, x_2) = \beta_0 + x_1 \beta_1 + x_2 \beta_2 + x_1 x_2 \beta_{12}$$
+
+In matrix notation, $y = X \beta$, each row of $y$ and $X$ correspond to a sample and measurement, and $X$ is called the **design matrix**. Here, the columns of $X$ would be
+$\begin{bmatrix} 1 & x_1 & x_2 & x_1 x_2 \end{bmatrix}$ and $\beta = \begin{bmatrix} \beta_0 & \beta_1 & \beta_2 & \beta_{12} \end{bmatrix}^\top$ where the first column of $X$ is 1 to account for the intercept $\beta_0$. Least-squares estimation of $\beta$ is then simply $\hat{\beta} = X^\dagger y$.
+
+Notes
+- Matrix notation makes it clear that the word "linear" in linear model refers to linearity in $\beta$, not the sample-level covariates, since we can express interactions between sample-level covariates as $x_1 x_2$.
+  - The model remains linear in $\beta$ if we scale the counts $y$ according to $\tilde{y} = f(y)$, where $f$ may be a variance stabilizing transform, for example.
+- Representing the interaction between two sample-level covariates as their product (e.g., $x_1 x_2$) is only valid if both sample-level covariates are binary indicators. To generalize to multiple possible values for each sample-level covariate, let $C_1$ denote the domain of $x_1$ and $C_2$ denote the domain of $x_2$. Then
+
+$$y = f(x_1, x_2) = \sum_{c \in C_1} \beta_c \delta(c, x_1) + \sum_{c \in C_2} \beta_c \delta(c, x_2) + \sum_{(c_1, c_2) \in C_1 \times C_2} \beta_{c_1,c_2} \delta(c_1, x_1) \delta(c_2, x_2)$$
+
+- Whether to include interactions among sample-level covariates is a modeling choice that depends on the amount of data available. For example, if there are 3 distinct binary covariates, then a **saturated** model would require ${3 \choose 1} + {3 \choose 2} + {3 \choose 3} = 3 + 3 + 1 = 7$ parameters $\beta_1$, $\beta_2$, $\beta_3$, $\beta_{12}$, $\beta_{13}$, $\beta_{23}$, $\beta_{123}$. If there is insufficient data to accurately estimate the effects of all interactions, or there is good reason to assume that the covariates are truly independent, interaction parameters may be dropped.
+- In R formulas, interactions are specified using the `:` and `*` operators. From the [documentation for `lm()`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html):
+  > A typical model has the form response ~ terms where response is the (numeric) response vector and terms is a series of terms which specifies a linear predictor for response. A terms specification of the form first + second indicates all the terms in first together with all the terms in second with duplicates removed. A specification of the form first:second indicates the set of terms obtained by taking the interactions of all terms in first with all terms in second. The specification first*second indicates the cross of first and second. This is the same as first + second + first:second.
 
 # Package notes
 

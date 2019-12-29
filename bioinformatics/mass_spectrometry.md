@@ -46,17 +46,26 @@ References
 
 ## Databases
 
-Spectral Database for Organic Compounds (SDBS)
+[Scripps METLIN](https://metlin.scripps.edu/)
+- Can restrict to known biological metabolites (i.e., annotated in the KEGG database)
+- Automatically searches common adducts
+
+[Spectral Database for Organic Compounds (SDBS)](https://sdbs.db.aist.go.jp/sdbs/cgi-bin/direct_frame_top.cgi)
 - National Institute of Advanced Industrial Science and Technology (AIST), Japan
-- https://sdbs.db.aist.go.jp/sdbs/cgi-bin/direct_frame_top.cgi
 
-MassBank
+[MassBank](http://www.massbank.jp/Search)
 - Mass Spectrometry Society of Japan
-- http://www.massbank.jp/Search
 
-Mass Bank of North America (MoNA)
-- http://mona.fiehnlab.ucdavis.edu/
+[Mass Bank of North America (MoNA)](http://mona.fiehnlab.ucdavis.edu/)
 - Common MS adducts: https://fiehnlab.ucdavis.edu/staff/kind/Metabolomics/MS-Adduct-Calculator/
+
+[Human Metabolome Database](http://hmdb.ca)
+- MS/MS spectra matching
+  - Scoring
+    - Fit: "degree of inclusion of a database spectrum in the target spectrum" (think: # shared peaks / # peaks in the database spectrum)
+    - Reverse Fit (RFit): "degree of inclusion of the target spectrum in a database spectrum" (think: # shared peaks / # peaks in the target spectrum)
+    - Purity: combined measure (think: # shared peaks / # of unique peaks across database and target spectra)
+    - Source: Bouchonnet, Stéphane. *Introduction to GC-MS coupling.* CRC Press, 2013. [Google Books](https://books.google.com/books?id=QU48NWHfiAAC&pg=PA145)
 
 ## Software notes
 
