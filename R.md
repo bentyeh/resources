@@ -19,7 +19,7 @@
   - [Non-standard evaluation (NSE)](#non-standard-evaluation-nse)
   - [Graphics](#graphics-1)
 - [References](#references)
-- [Installing R](#installing-r)
+- [Installing R and Packages](#installing-r-and-packages)
   - [WSL](#wsl)
     - [Upgrading R](#upgrading-r)
     - [References](#references-1)
@@ -353,7 +353,18 @@ Style
 - [The tidyverse style guide](https://style.tidyverse.org/)
 - [Google's R Style Guide](https://google.github.io/styleguide/Rguide.xml)
 
-# Installing R
+# Installing R and Packages
+
+Errors
+- `Error in if (nzchar(SHLIB_LIBADD)) SHLIB_LIBADD else character()`
+  - Problem: empty Makeconf file in ~/miniconda3/envs/<env>/lib/R/etc
+  - Solution: copy a Makeconf file from a non-conda installation and edit as necessary
+  - See https://stackoverflow.com/questions/53813323/installing-r-packages-in-macos-mojave-error-in-if-nzcharshlib-libadd
+- `cannot move '<path_to_R>/lib/R/library/00LOCK-<pkg>/00new/<pkg>' ...`
+  - Solutions
+    1. From the terminal: `R CMD INSTALL --no-lock <pkg>` ([source](https://stackoverflow.com/a/14389028))
+    2. From the R interpreter: add `INSTALL_opts = '--no-lock'` as an argument to `install.packages()` (or `BiocManager::install()`) ([source](https://stackoverflow.com/a/14389028))
+    3. Disable staged installation by setting the environment variable `R_INSTALL_STAGED=false` ([source](https://github.com/r-lib/ps/issues/63))
 
 ## WSL
 
