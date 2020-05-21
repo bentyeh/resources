@@ -13,7 +13,7 @@ Redirect stderr: `2>`\
 Pipe stderr: `2>&1 1> /dev/null |`\
 Redirect stderr and pipe stdout: `2> tmp.txt |`\
 Redirect stdout and pipe stderr: `2>&1 1> tmp.txt |`\
-Redirect stdout and stderr: `&>` == `> tmp.txt 2>&1` == `2> tmp.txt 1>&2`
+Redirect stdout and stderr: `&>` == `> tmp.txt 2>&1` == `2> tmp.txt 1>&2`\
 Pipe stdout and stderr: `2>&1 |`
 
 Pipe stdout to a command that normally reads from a file
