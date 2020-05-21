@@ -24,9 +24,6 @@
     - [GSEA](#gsea)
   - [Pathway-topology (PT)-based approaches](#pathway-topology-pt-based-approaches)
     - [SPIA](#spia)
-      - [DEG enrichment analysis](#deg-enrichment-analysis)
-      - [Pathway perturbation analysis](#pathway-perturbation-analysis)
-      - [Combining DEG and pathway analyses](#combining-deg-and-pathway-analyses)
 - [References](#references)
 
 # Probability distribution of counts
@@ -248,7 +245,7 @@ Formally, consider a set of raw reads $F'$. Reads from the same fragment are tre
 
 ### Dataset
 
-Dataset numbers
+Dataset size
 - $n$: number of genes
 - $m$: number of samples
 - $c$: number of conditions (including intercept)
@@ -372,7 +369,7 @@ When sample sizes are small, dispersion estimates $\alpha_i$ are highly variable
 
 # Knowledge base-driven pathway analysis
 
-Let $G$ denote the set of all genes considered, with $|G| = N$. For example, if we consider all protein-coding human genes, $N \approx 20438$ (according to statistics from [Ensembl](http://www.ensembl.org/Homo_sapiens/Info/Annotation)).
+Let $G$ denote the set of all genes considered, with $\lvert G \rvert = N$. For example, if we consider all protein-coding human genes, $N \approx 20438$ (according to statistics from [Ensembl](http://www.ensembl.org/Homo_sapiens/Info/Annotation)).
 
 Input
 - Expression matrix
@@ -401,7 +398,7 @@ Method
    - Test sample: $x = |\delta \cap S|$. $|\delta|$ genes are drawn from the set $\delta$ of all DEGs.
    - Null distribution: $|\delta|$ genes are drawn from the set $G$ of all genes.
      - Binomial: assumes genes are drawn with replacement. $X \sim \mathrm{Binom}(n = |\delta|, p = \frac{N_S}{N})$.
- 
+
        $$
        p
        = P(X \geq x)
@@ -443,19 +440,21 @@ Assumptions
 
 ### GSEA
 
+Acronym: Gene Set Enrichment Analysis
+
 Algorithm
 1. Compute gene-level statistic: fold-change of average expression between conditions, correlation between expression and phenotype, etc.
 2. Rank genes from most-to-least differentially-expressed according to their gene-level statistic.
    - Let $r_i$ denote the gene-level statistic of the $i$th ranked gene $g_i$, where $i \in [1, N]$.
 3. Use a "random walk" to calculate enrichment score (ES).
    - Use labels $y_i \in \{0, 1\}$ to denote whether ranked gene $i$ is in the gene set $S$ of interest.
-   - Old method [[2003 GSEA paper]](#references): equal weights at every step; $\text{ES}$ is a standard [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) statistic.
+   - Old method [[GSEA 2003]](#references): equal weights at every step; $\text{ES}$ is a standard [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) statistic.
      $$\begin{gathered}
      p_\text{hit} = \sqrt{\frac{N - N_S}{N_S}} \\
      p_\text{miss} = -\sqrt{\frac{N_S}{N - N_S}} \\
      \text{ES} = \max_{n \in [1, N]} \left\lvert \sum_{i=1}^n y_i p_\text{hit} + (1 - y_i) p_\text{miss} \right\rvert
      \end{gathered}$$
-   - New method [[2005 GSEA paper]](#references): steps are weighted according to each gene's gene-level statistic; $\text{ES}$ is a weighted [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) statistic.
+   - New method [[GSEA 2005]](#references): steps are weighted according to each gene's gene-level statistic; $\text{ES}$ is a weighted [Kolmogorov-Smirnov](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test) statistic.
      - Formulation to match the notation of the old method:
        $$\begin{aligned}
        p_\text{hit}(i) &= \begin{cases}
@@ -472,9 +471,9 @@ Algorithm
        \text{ES}(S) &= \max_{i \in [1, N]} \left\lvert P_\text{hit}(S, i) - P_\text{miss}(S, i) \right\rvert
        \end{aligned}$$
        - $P_\text{hit}(S, i)$ and $P_\text{miss}(S, i)$ are the fraction (with respect to genes $i = 1, ..., i$) of genes in / not in $S$ weighted by their gene-level statistics.
-   - $p$ is a hyperparameter controlling the weight of each step in the random walk.
-     - The authors recommend a default of $p = 1$. [[2005 paper supplemental text]](#references)
-     - When $p=0$, the new method becomes nearly identical to the old method with equal weights at every step: $p_\text{hit}(i)$ becomes $\frac{1}{N_S}$.
+     - $p$ is a hyperparameter controlling the weight of each step in the random walk.
+       - The authors recommend a default of $p = 1$. [[GSEA 2005 supplemental]](#references)
+       - When $p=0$, the new method becomes nearly identical to the old method with equal weights at every step: $p_\text{hit}(i)$ becomes $\frac{1}{N_S}$.
    - Note that the "random walk" always returns to 0:
      - Old method:
        $$\begin{aligned}
@@ -511,14 +510,16 @@ Limitations
 
 ### SPIA
 
+Acronym: Signaling Pathway Impact Analysis
+
 Idea
 > The impact analysis combines two types of evidence: (i) the over-representation of DE genes in a given pathway and (ii) the abnormal perturbation of that pathway, as measured by propagating measured expression changes across the pathway topology. These two aspects are captured by two independent probability values, $P_{NDE}$ and $P_{PERT}$. [[SPIA paper]](#references)
 
-#### DEG enrichment analysis
+**DEG enrichment analysis: $P_{NDE}$**
 
 > Any of the existing ORA or FCS approaches can be used to calculate $P_{NDE}$, as long as this probability remains independent of the magnitudes of the fold-changes.
 
-#### Pathway perturbation analysis
+**Pathway perturbation analysis: $P_{PERT}$**
 
 Define the following symbols:
 - $g_1, ..., g_{N_S}$: genes in the pathway $S$
@@ -533,9 +534,8 @@ Define the following symbols:
 
 Linear system
 
-$$
-PF(g_i) = \Delta E(g_i) + \sum_{j=1}^{N_S} \beta_{ij} \frac{PF(g_j)}{N_{ds}(g_j)}
-$$
+$$PF(g_i) = \Delta E(g_i) + \sum_{j=1}^{N_S} \beta_{ij} \frac{PF(g_j)}{N_{ds}(g_j)}$$
+
 
 $$
 \underbrace{\begin{bmatrix}
@@ -566,7 +566,7 @@ $$t_A = \sum_{i=1}^{N_S} \mathrm{Acc}(g_i)$$
 
 Finally, $P_{PERT} = P(T_A \geq t_A \mid H_0)$ is calculated as the $p$-value of the pathway-level statistic $t_A$ following a bootstrap procedure described in the supplemental text of the [[SPIA paper]](#references).
 
-#### Combining DEG and pathway analyses
+**Combining DEG and pathway analyses: $P_G$**
 
 Let the observed / computed values of $P_{NDE}$ and $P_{PERT}$ be $p_{nde}, p_{pert}$, respectively with $p_{nde} \cdot p_{pert} = c$.
 
@@ -613,6 +613,6 @@ $$
 16. Tomczak, A. et al. Interpretation of biological experiments changes with evolution of the Gene Ontology and its annotations. *Scientific Reports* 8, 5115 (2018). [doi:10.1038/s41598-018-23395-2](https://doi.org/10.1038/s41598-018-23395-2).
     - > Our analysis suggests that GO evolution may have affected the interpretation and possibly reproducibility of experiments over time.
 17. Haynes, W. A., Tomczak, A. & Khatri, P. Gene annotation bias impedes biomedical research. *Scientific Reports* 8, 1362 (2018). [doi:10.1038/s41598-018-19333-x](https://doi.org/10.1038/s41598-018-19333-x).
-    - > Collectively, our results provide an evidence of a strong research bias in literature that focuses on well-annotated genes instead of those with the most significant disease relationship in terms of both expression and genetic variation. We show that the inequality follows a "rich-getting-richer" pattern, where annotation growth is biased towards genes that were richly annotated in the initial versions of GO. We believe this stems from the typical experimental design. To illustrate this, consider an omics experiment that generates a list of hundreds or thousands of interesting genes. To interpret these genes, researchers use GO and pathway analysis tools. The researchers then generate targeted hypotheses for validation by interpreting the list of significant GO terms, focusing the genes or proteins annotated with that GO term. The researchers learn more about those targeted genes, leading to additional GO annotations for the already annotated genes. In this process, the list of unannotated genes is simply ignored because pathway analysis tools cannot map them to any GO terms. Hence, the self-perpetuating cycle of inequality continues.
+    - > Collectively, our results provide an evidence of a strong research bias in literature that focuses on well-annotated genes instead of those with the most significant disease relationship in terms of both expression and genetic variation.
 18. Tarca, A. L. et al. A novel signaling pathway impact analysis. *Bioinformatics* 25, 75–82 (2009). [doi:10.1093/bioinformatics/btn577](https://doi.org/10.1093/bioinformatics/btn577).
     - SPIA paper.
