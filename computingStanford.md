@@ -1,20 +1,3 @@
-# [Computing at Stanford](#computing-at-stanford)
-- [Computing at Stanford](#computing-at-stanford)
-- [AFS](#afs)
-- [Clusters](#clusters)
-  - [Farmshare](#farmshare)
-  - [Sherlock](#sherlock)
-  - [SCG4: Stanford Genomics Cluster](#scg4-stanford-genomics-cluster)
-- [Interactive Environments](#interactive-environments)
-  - [Jupyter](#jupyter)
-  - [RStudio](#rstudio)
-  - [RStudio Server](#rstudio-server)
-  - [SSH Tunneling](#ssh-tunneling)
-    - [forward utility](#forward-utility)
-- [Questions](#questions)
-  - [Unanswered](#unanswered)
-  - [Answered](#answered)
-
 # AFS
 
 WebAFS: https://afs.stanford.edu/

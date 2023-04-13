@@ -1,13 +1,5 @@
 # HOMER
 
-- [HOMER](#homer)
-  - [Usage <a name="usage"></a>](#usage-a-name%22usage%22a)
-  - [Motif library](#motif-library)
-    - [Additional data/ files](#additional-data-files)
-  - [Questions](#questions)
-  - [References](#references)
-  - [Changes to default 4.10 installation](#changes-to-default-410-installation)
-
 ## Usage <a name="usage"></a>
 
 Finding motifs

@@ -1,20 +1,3 @@
-# Python Notes
-- [Python Notes](#python-notes)
-- [Base Python](#base-python)
-    - [Two ways to call a method](#two-ways-to-call-a-method)
-- [Packages](#packages)
-  - [Numpy](#numpy)
-  - [Jupyter Notebooks](#jupyter-notebooks)
-    - [Installing multiple kernels](#installing-multiple-kernels)
-      - [Option 1: `nb_conda_kernels` package](#option-1-nbcondakernels-package)
-      - [Option 2: Use `ipykernel install` command](#option-2-use-ipykernel-install-command)
-      - [Option 3: Create new kernel spec](#option-3-create-new-kernel-spec)
-    - [NBConvert](#nbconvert)
-      - [Hiding cells from output](#hiding-cells-from-output)
-      - [Saving to PDF](#saving-to-pdf)
-- [Miscellaneous](#miscellaneous)
-  - [Loading compressed TIFF images](#loading-compressed-tiff-images)
-
 # Base Python
 
 ### Two ways to call a method

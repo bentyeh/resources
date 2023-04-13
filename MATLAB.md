@@ -1,14 +1,3 @@
-- [Syntax / Interpreter](#syntax--interpreter)
-  - [Input and Output Arguments](#input-and-output-arguments)
-    - [Validating arguments](#validating-arguments)
-    - [Variable number of arguments](#variable-number-of-arguments)
-  - [Miscellaneous](#miscellaneous)
-    - [`gradient()` v. `diff()`](#gradient-v-diff)
-- [Toolboxes](#toolboxes)
-  - [Image Processing Toolbox](#image-processing-toolbox)
-    - [`imshow()` v. `image()`](#imshow-v-image)
-- [References](#references)
-
 # Syntax / Interpreter
 
 ## Input and Output Arguments

@@ -1,18 +1,3 @@
-- [Multiple Testing](#multiple-testing)
-  - [Definitions](#definitions)
-  - [Procedures](#procedures)
-    - [FWER](#fwer)
-      - [Bonferroni](#bonferroni)
-      - [Šidák](#šidák)
-    - [FDR](#fdr)
-      - [Benjamini-Hochberg](#benjamini-hochberg)
-      - [$q$-value](#q-value)
-      - [Empirical Bayes: two-groups model](#empirical-bayes-two-groups-model)
-    - [Weighted tests](#weighted-tests)
-  - [Questions](#questions)
-- [Shrinkage Estimation](#shrinkage-estimation)
-  - [Over-dispersion of maximum likelihood estimate (MLE)](#over-dispersion-of-maximum-likelihood-estimate-mle)
-
 <script>
 document.getElementsByTagName("head")[0].getElementsByTagName("title")[0].innerHTML = "Statistics Notes";
 </script>
