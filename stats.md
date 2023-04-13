@@ -3,7 +3,7 @@
   - [Procedures](#procedures)
     - [FWER](#fwer)
       - [Bonferroni](#bonferroni)
-      - [Šidák](#%c5%a0id%c3%a1k)
+      - [Šidák](#šidák)
     - [FDR](#fdr)
       - [Benjamini-Hochberg](#benjamini-hochberg)
       - [$q$-value](#q-value)
