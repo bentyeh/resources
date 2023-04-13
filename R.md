@@ -2,7 +2,10 @@
   - [Modeling](#modeling)
     - [Simple model](#simple-model)
     - [Interactions and Linearity](#interactions-and-linearity)
+  - [Debugging](#debugging)
+- [Piping](#piping)
 - [Package notes](#package-notes)
+  - [dplyr](#dplyr)
   - [RDAVIDWebService](#rdavidwebservice)
   - [pheatmap](#pheatmap)
   - [doParallel](#doparallel)
@@ -77,7 +80,21 @@ $$y = f(x_1, x_2) = \sum_{c \in C_1} \beta_c \delta(c, x_1) + \sum_{c \in C_2} \
 - In R formulas, interactions are specified using the `:` and `*` operators. From the [documentation for `lm()`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html):
   > A typical model has the form response ~ terms where response is the (numeric) response vector and terms is a series of terms which specifies a linear predictor for response. A terms specification of the form first + second indicates all the terms in first together with all the terms in second with duplicates removed. A specification of the form first:second indicates the set of terms obtained by taking the interactions of all terms in first with all terms in second. The specification first\*second indicates the cross of first and second. This is the same as first + second + first:second.
 
+## Debugging
+
+Debugging generic functions: https://stackoverflow.com/questions/1708074/debugging-generic-functions-in-r
+`trace("plot", browser, exit=browser, signature = c("track", "missing")) `
+
+# Piping
+
+https://stackoverflow.com/questions/38717657/use-pipe-without-feeding-first-argument
+https://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html
+
 # Package notes
+
+## dplyr
+
+functions within mutate and summarise can return multiple values if they return a data.frame or matrix
 
 ## RDAVIDWebService
 - Installation
@@ -154,7 +171,10 @@ Implicit grouping: categorical variables that map to an aesthetic (x, y, color, 
   ```
 
 Statistical transformations
-- Explicity access computed variables (e.g., `..prop..` and `..count..` for `stat_count()`) using  extra dots in the variable names
+- Explicity access computed variables (e.g., `..prop..` and `..count..` for `stat_count()`) using extra dots in the variable names
+
+Useful extensions
+- Nested facets based on patchwork package: https://coolbutuseless.github.io/2018/10/31/facet_inception/
 
 ## Graphics
 - Grid graphics
@@ -221,7 +241,7 @@ Properties of S4Vectors::List
       - Requires that the XStringSet has `names` attribute.
 - Looping
   - `aggregate()`: combine sequence extraction with `sapply`
-  - `endoapply()`: endomorphic equivalent of `lapply`, i.e., i.e. it returns a `S4Vectors::List` derivative of the same class as the input rather than a `base::list` object.
+  - `endoapply()`: endomorphic equivalent of `lapply`, i.e., it returns a `S4Vectors::List` derivative of the same class as the input rather than a `base::list` object.
 - Annotations
   - Metadata about the object as a whole
     - Representation: `base::list`
@@ -365,6 +385,12 @@ Errors
     1. From the terminal: `R CMD INSTALL --no-lock <pkg>` ([source](https://stackoverflow.com/a/14389028))
     2. From the R interpreter: add `INSTALL_opts = '--no-lock'` as an argument to `install.packages()` (or `BiocManager::install()`) ([source](https://stackoverflow.com/a/14389028))
     3. Disable staged installation by setting the environment variable `R_INSTALL_STAGED=false` ([source](https://github.com/r-lib/ps/issues/63))
+
+Upgrading
+- Windows: see [R Windows FAQ](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#What_0027s-the-best-way-to-upgrade_003f)
+  1. Uninstall previous version of R
+  2. Copy packages from the old library folder into the new library folder.
+  3. Run `update.packages(checkBuilt = TRUE)`
 
 ## WSL
 

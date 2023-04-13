@@ -40,6 +40,7 @@ Notes
 References
 - https://ipython.readthedocs.io/en/latest/install/kernel_install.html
 - https://docs.anaconda.org/anaconda/user-guide/tasks/use-jupyter-notebook-extensions/
+- https://stackoverflow.com/questions/53004311/how-to-add-conda-environment-to-jupyter-lab
 
 #### Option 1: `nb_conda_kernels` package
 

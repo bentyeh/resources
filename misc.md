@@ -1,5 +1,9 @@
 Miscellaneous software tools
 
+# Google Drive
+
+Searching for Google Colaboratory notebooks: "type:application/vnd.google.colaboratory" || "type:application/vnd.google.colab"
+
 ## gdrive
 
 [gdrive: Google Drive CLI Client](https://github.com/gdrive-org/gdrive)

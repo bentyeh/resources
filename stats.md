@@ -193,7 +193,7 @@ Visual interpretation
 
 Motivation: Consider data whose $p$-values are differentially distributed according to a covariate. For a given $p$-value, the FDR for each subgroup will be different. A procedure (e.g., [Benjamini-Hochberg](#benjamini-hochberg) or [Bonferroni](#bonferroni)) that uses a global threshold will therefore have suboptimal power.
 
-<img src="https://media.nature.com/lw926/nature-assets/nmeth/journal/v13/n7/images/nmeth.3885-F1.jpg"/>
+<img src="https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fnmeth.3885/MediaObjects/41592_2016_Article_BFnmeth3885_Fig1_HTML.jpg"/>
 
 Procedure: Let $w_i \ge 0$ and $\frac{1}{m} \sum_{i=1}^m w_i = 1$ (fixed total "weight budget"). Define weighted $p$-values $Q_i = \frac{p_i}{w_i}$. Apply unweighted procedure to the weighted $p$-values $Q_i$.
 
