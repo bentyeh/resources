@@ -54,9 +54,9 @@ Indexes
 
 **`idxstats` v. `flagstat` v. `stats`**
 
-idxstats: reference sequence name, sequence length, # mapped reads and # unmapped reads\
-flagstat: `(N + M)` for a 13 categories (combinations of FLAGs), where `N`, `M` are counts of QC-passed/-failed reads in a given category (see [samtools doc](http://www.htslib.org/doc/samtools.html) for a description of the categories)\
-stats: similar information to that of flagstat, but in a format to be plotted by plot-bamstats
+- `idxstats`: reference sequence name, sequence length, # mapped reads and # unmapped reads
+- `flagstat`: `(N + M)` for a 13 categories (combinations of FLAGs), where `N`, `M` are counts of QC-passed/-failed reads in a given category (see [samtools doc](http://www.htslib.org/doc/samtools.html) for a description of the categories)
+- `stats`: similar information to that of flagstat, but in a format to be plotted by plot-bamstats
 
 **samtools v. bcftools mpileup**
 

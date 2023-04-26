@@ -394,3 +394,18 @@ If installed in a `conda` environment, it may cause the `pager` command to behav
   - generic, may affect R behavior
     - Set `$PAGER` upon activation of the environment. See https://conda.io/docs/user-guide/tasks/manage-environments.html#saving-environment-variables
     - Remove the new `pager` script installed by conda: `rm <conda_install_dir>/envs/<env_name>/bin/pager`
+
+## RStudio
+
+Using an installation R at a non-conventional path
+- RStudio expects R to be installed at certain locations, and newer versions may simply refuse to launch if it cannot find an R installation. To use R installed at a non-conventional path, edit `C:\Users\<username>\AppData\Roaming\RStudio\config.json`:
+  ```{json}
+  "platform": {
+    "windows": {
+        "rBinDir": "<path to R bin/x64 folder>",
+        "preferR64": true,
+        "rExecutablePath": "<path to R bin/x64 folder>R.exe"
+    }
+  }
+  ```
+  Source: https://github.com/rstudio/rstudio/issues/11141#issuecomment-1212085629
