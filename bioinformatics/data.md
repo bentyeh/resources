@@ -1,3 +1,25 @@
+# ENCODE
+
+## ENCODE Blacklists
+
+References
+- Paper: Amemiya HM, Kundaje A, Boyle AP. The ENCODE Blacklist: Identification of Problematic Regions of the Genome. *Sci Rep*. 2019;9(1):9354. Published 2019 Jun 27. doi:[10.1038/s41598-019-45839-z](https://doi.org/10.1038/s41598-019-45839-z)
+- Anshul Kundaje's webpage: https://sites.google.com/site/anshulkundaje/projects/blacklists
+- ENCODE Annotation File Set: https://www.encodeproject.org/annotations/ENCSR636HFF/
+- Boyle lab GitHub repo: https://github.com/Boyle-Lab/Blacklist
+
+| Genome | Blacklist version | Links |
+| ------ | ----------------- | ----- |
+| hg19   | v1                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg19-blacklist.bed.gz), [ENCODE](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz)* |
+| hg19   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg19-blacklist.v2.bed.gz) |
+| GRCh38 | v1                | [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/hg38-human/hg38.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg38-blacklist.bed.gz) |
+| GRCh38 | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg38-blacklist.v2.bed.gz) |
+| GRCh38 | v3                | [ENCODE](https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz) |
+| mm10   | v1                | [ENCODE](https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz), [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/mm10-mouse/mm10.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/mm10-blacklist.bed.gz) |
+| mm10   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/mm10-blacklist.v2.bed.gz)
+
+\* Confusingly, [Anshul Kundaje's webpage](https://sites.google.com/site/anshulkundaje/projects/blacklists) lists the hg19 annotation file [ENCFF001TDO](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz) as both Version 1 and Version 3. The file is identical to Version 1 of the hg19 blacklist on the Boyle Lab GitHub.
+
 # UCSC
 
 Download site: https://hgdownload.soe.ucsc.edu/downloads.html
