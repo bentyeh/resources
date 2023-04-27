@@ -107,3 +107,11 @@ Options
 - `-C`: gzip-compress all traffic - desirable on slower networks
 - `-X`: Enables X11 forwarding
 - `-Y`: Enables trusted X11 forwarding. This is *less secure* than `-X` but may be required for compatibility. On Debian (e.g., Ubuntu) systems, `-X` defaults to `-Y`.
+
+# Local software installation
+
+Typical setup (see https://askubuntu.com/a/633924)
+- Binaries: place in `$HOME/bin/` (example: `$HOME/bin/pandoc`)
+  - Add `$HOME/bin` to `PATH`, such as in `.bashrc`: `PATH="$HOME/bin:$PATH"`
+- Man pages: place in `$HOME/share/man/` (example: `$HOME/share/man/man1/pandoc.1.gz`)
+  - Add `$HOME/share/man` to `MANPATH`, such as in `.bashrc`: `MANPATH="$HOME/share/man:$MANPATH"`
