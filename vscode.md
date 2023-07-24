@@ -125,3 +125,8 @@ VS Code has a built-in Markdown previewer, but it does not natively support LaTe
 
 ## Python
 
+## Remote - SSH
+
+OpenSSH on Windows does not currently support [ControlMaster](https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing), which allows connections to remain open in the background. One advantage of this feature is to reduce the number of times a user has to enter their password by reusing the existing connection.
+
+Windows Subsystem for Linux (WSL), however, includes an OpenSSH client that does support ControlMaster. Consequently, if you have ControlMaster set up in your WSL ssh config file (see [example for Stanford's Sherlock servers here](https://issm.ess.uci.edu/trac/issm/wiki/sherlock)), you can direct VSCode to use your WSL ssh client: https://stackoverflow.com/questions/60150466/can-i-ssh-from-wsl-in-visual-studio-code.
