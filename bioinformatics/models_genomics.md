@@ -1,3 +1,30 @@
+# General Library Preparation and Sequencing Considerations
+
+## Estimating Library Complexity
+
+Problem: Consider a sample of $M$ unique molecules, each of which exists in some copy number $c$ (the same for all unique molecules). Given $D$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+
+Approach: Let $n$ be a random variable giving the number of reads per molecule.
+1. The expected number of reads per unique molecule is $\mathbb{E}(n) = \lambda = T / M$.
+2. The number of deduplicated molecules is $D = p(n \geq 1) \cdot M$.
+
+If we assume a Poisson distribution for $n$,
+$$p(n \geq 1) = 1 - p(n = 0) = 1 - \frac{\lambda^0 e^{-\lambda}}{0!} = 1 - e^{-\lambda} = 1 - e^{-T/M}$$
+
+Then we obtain a non-linear equation with a single unknown, $M$:
+$$D = p(n \geq 1) \cdot M = (1 - e^{-T/M}) \cdot M$$
+
+Solve numerically:
+```{python}
+import scipy
+D = <some measured value>
+T = <some measured value>
+scipy.optimize.minimize_scalar(
+  fun=lambda M: (M * (1 - np.exp(-T/M)) - D)**2,
+  bracket=(D, T)
+)
+```
+
 # RNA-Seq
 
 Library preparation assumptions
