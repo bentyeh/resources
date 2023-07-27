@@ -75,7 +75,7 @@ class BashRunnerWithSharedEnvironment(AbstractContextManager):
 
 NumPy array broadcasting tutorial: https://jakevdp.github.io/PythonDataScienceHandbook/02.05-computation-on-arrays-broadcasting.html
 
-## Jupyter Notebooks
+## Jupyter
 
 ### Installing multiple kernels
 
@@ -168,6 +168,30 @@ Directories and intermediary files
 - If the path of the file to be converted is passed as an absolute path, then the LaTeX file will have absolute paths to the intermediate PNG files
   - Unfortunately, if the absolute path contains spaces (which is likely if using Google Colab, since the path to a file will almost always go through the directory '/content/gdrive/My Drive'), the LaTeX file will have an invalid `\includegraphics{<path with spaces>}` command.
   - The solution is to set the working directory to the directory containing the Jupyter notebook to be converted, then use relative paths.
+
+### Interacting with the Jupyter Server
+
+> Jupyter Server is the backend—the core services, APIs, and REST endpoints—to Jupyter web applications.
+>
+> Most of the time, you won’t need to start the Jupyter Server directly. Jupyter Web Applications (like Jupyter Notebook, Jupyterlab, Voila, etc.) come with their own entry points that start a server automatically.
+>
+> Sometimes, though, it can be useful to start Jupyter Server directly when you want to run multiple Jupyter Web applications at the same time.
+>
+> ... every Jupyter frontend application is now a server extension.
+
+Examples
+- List available extensions: (terminal) `jupyter server extension list`
+- Get list of active kernels: (HTTP GET request) `http://<server address>/api/kernels`
+  - For example, if a server is launched listening to port `8888` on `localhost`, you can run: (terminal) `curl -X GET "http://localhost:8888/api/kernels?token=<token>"`
+
+Example use case: As of July 2023, the VSCode Jupyter extension [[marketplace](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) | [GitHub](https://github.com/microsoft/vscode-jupyter)] does not have full kernel management support [[GitHub issue](https://github.com/microsoft/vscode-jupyter/issues/1379)]. For example, if you open a notebook and start it with a *new kernel* on an *existing Jupyter server*, there is no way in the VSCode GUI to shutdown that kernel. To do so, you would have to run `curl -X DELETE "http://localhost:8888/api/kernels/<kernel_id>?token=<token>"` on the host were the Jupyter server was launched. The `<kernel_id>` can be found by inspecting the standard output of the Jupyter server.
+
+- Note: There is an official but experimental extension, Jupyter PowerToys [[marketplace](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.vscode-jupyter-powertoys) | [GitHub](https://github.com/microsoft/vscode-jupyter-powertoys)] that provides a kernel management panel.
+
+References
+- https://wasimlorgat.com/posts/how-to-build-your-own-minimal-jupyter-frontend.html
+- [Jupyter Server official documentation](https://jupyter-server.readthedocs.io)
+  - [REST API](https://jupyter-server.readthedocs.io/en/latest/developers/rest-api.html)
 
 # Miscellaneous
 
