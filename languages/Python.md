@@ -6,6 +6,7 @@ Let `obj = myClass()` be an instance of a `myClass` object, which defines a `myM
 1. `obj.myMethod()`
 2. `myClass.myMethod(obj)`
    - This statement makes it clear that `obj` is passed into the method as the `self` argument.
+     - Technically, the first argument of a method does not need to be named `self`, and "the name self has absolutely no special meaning to Python." [The [Python Tutorial](https://docs.python.org/3/tutorial/classes.html)]
 
 # Python Standard Library
 
@@ -74,6 +75,14 @@ class BashRunnerWithSharedEnvironment(AbstractContextManager):
 ## Numpy
 
 NumPy array broadcasting tutorial: https://jakevdp.github.io/PythonDataScienceHandbook/02.05-computation-on-arrays-broadcasting.html
+
+## IPython
+
+### IPython Magics
+
+Escaping characters in shell assignments: escape `$`, `{`, or `}` with itself.
+
+Example: Print the number of reads from a gzipped FASTQ file: `!zcat "{os.path.join(DIR_DATA, 'R1.fastq.gz')}" | wc -l | awk '{{print $$1 / 4}}'`
 
 ## Jupyter
 
