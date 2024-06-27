@@ -361,6 +361,28 @@ Upgrading
   2. Copy packages from the old library folder into the new library folder.
   3. Run `update.packages(checkBuilt = TRUE)`
 
+Installing binary packages from Posit Package Manager (PPM)
+- Change `repos` option to PPM: see https://packagemanager.posit.co/client/#/
+- Example (Caltech HPC, running RHEL 9): add the following to `~/.Rprofile`:
+    ```{r}
+    options(
+      HTTPUserAgent = sprintf(
+          "R/%s R (%s)",
+          getRversion(),
+          paste(
+              getRversion(),
+              R.version["platform"],
+              R.version["arch"],
+              R.version["os"]
+          )
+      ),
+      repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/rhel9/latest"),
+      BioC_mirror = "https://packagemanager.posit.co/bioconductor",
+      BIOCONDUCTOR_CONFIG_FILE = "https://packagemanager.posit.co/bioconductor/config.yaml"
+    )
+    ```
+- Reference: https://www.r-bloggers.com/2023/07/posit-package-manager-for-linux-r-binaries/
+
 ## WSL
 
 ### Upgrading R
