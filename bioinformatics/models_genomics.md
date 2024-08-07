@@ -2,10 +2,22 @@
 
 ## Estimating Library Complexity
 
-Problem: Consider a sample of $M$ unique molecules, each of which exists in some copy number $c$ (the same for all unique molecules). Given $D$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+Consider a library of $M$ unique molecular species. Let subscript $i = 1, ..., M$ index these unique molecular species.
+- Let $c_i$ denote the copy number of species $i$ in the library.
+- Let $\pi_i$ denote the probability that an arbitrary read samples species $i$.
+  - Generally, we assume uniform random sampling of reads from the library such that $\pi_i = \frac{c_i}{\sum_{j=1}^M c_j}$.
+- Let $x_i(T)$ be a random variable giving the number of reads for species $i$ obtained from $T$ total reads.
+  - Generally, we assume that $x_i$ are i.i.d. for all $i$. While this violates the constraint that $\sum_{i=1}^M x_i(T) = T$ (and relatedly, that $\sum_{i=1}^M \pi_i = 1$), this assumption should not significantly reduce accuracy of estimates in the regime that $x_i(T) \ll T$ for all $i$.
 
-Approach: Let $n$ be a random variable giving the number of reads per molecule.
-1. The expected number of reads per unique molecule is $\mathbb{E}(n) = \lambda = T / M$.
+### Poisson
+
+Assumption: all molecular species are equally represented - i.e., $\pi_i = 1 / M$ for all $i$.
+
+Problem: Given $D$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+
+Approach
+1. The expected number of reads per unique molecule is $\mathbb{E}(x_i) = \lambda = T / M$.
+   - The analogous Binomial formulation is $T$ trials with probability $1/M$ of sampling species $i$ on any given trial.
 2. The number of deduplicated molecules is $D = p(n \geq 1) \cdot M$.
 
 If we assume a Poisson distribution for $n$,
@@ -23,6 +35,68 @@ scipy.optimize.minimize_scalar(
   fun=lambda M: (M * (1 - np.exp(-T/M)) - D)**2,
   bracket=(D, T)
 )
+```
+
+<span style="color: red">Is this considered an MLE approach?</span>
+
+Conceptually, one might consider the following MLE approach:
+1. We observe read counts $x_i(T)$ for $i = 1, ..., D$ molecular species.
+2. We perform MLE for a Poisson distribution using these read counts. The MLE estimator of $\lambda$ is just the mean read count
+   $$\hat{\lambda} = \frac{1}{D} \sum_{i=1}^D x_i(T)$$
+3. Then, we estimate $\hat{M} = T / \hat{\lambda}$.
+
+This unfortunately does not work, since the MLE for a Poisson distribution requires knowing the counts for all species - i.e., the equation in step 2 above should be
+$$\hat{\lambda} = \frac{1}{M} \sum_{i=1}^M x_i(T)$$
+
+Unfortunately, we do not know what $M$ is (we are trying to solve for $M$). However, this conceptual approach can be adopted if we instead use a zero-truncated Poisson distribution instead.
+
+### Zero-truncated Poisson
+
+A zero-truncated Poisson distribution "is the conditional probability distribution of a Poisson-distributed random variable, given that the value of the random variable is not zero." [[Wikipedia](https://en.wikipedia.org/wiki/Zero-truncated_Poisson_distribution)]
+
+We can derive the probability mass function $g(k; \lambda)$ from a standard Poisson distribution $f(k; \lambda)$:
+
+$$
+g(k; \lambda)
+= P(X = k \mid X \gt 0)
+= \frac{f(k; \lambda)}{1 - f(0; \lambda)}
+= \frac{\lambda^k e^{-\lambda}}{k! (1 - e^{-\lambda})}
+= \frac{\lambda^k}{k! (e^\lambda - 1)}
+$$
+
+The mean is $\mathbb{E}(X) = \frac{\lambda}{1 - e^{-\lambda}}$.
+
+The method of moments estimator $\hat{\lambda}$ for parameter $\lambda$ (where $\lambda$ is the parameter of the underlying Poisson distribution) is obtained by solving the equation
+
+$$
+\frac{\hat{\lambda}}{1 - e^{-\hat{\lambda}}} = \bar{x}
+$$
+
+where $\bar{x} = \sum_{i=1}^D x_i(T)$ is the sample mean *of the observed counts*.
+
+Solve numerically:
+```{python}
+import scipy
+
+# implementation 1
+lb = <some lower bound >= 0>
+counts_mean = <mean observed counts>
+T = <total number of reads>
+res = scipy.optimize.minimize_scalar(
+  fun=lambda l: (l / (1 - np.exp(-l)) - counts_mean)**2,
+  bracket=(lb, counts_mean)
+)
+T / res.x
+
+# implementation 2 (equivalent results)
+ub = <some upper bound >= count_total / count_mean>
+counts_mean = <mean observed counts>
+T = <total number of reads>
+res = scipy.optimize.minimize_scalar(
+  fun=lambda M: ((T / M) / (1 - np.exp(-T / M)) - counts_mean)**2,
+  bracket=(T / counts_mean, ub)
+)
+res.x
 ```
 
 # RNA-Seq
