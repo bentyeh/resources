@@ -110,9 +110,10 @@ Install the `nb_conda_kernels` package. This enables the following features:
 
 This assumes you have 2 environments: one that includes jupyter, and the other than includes a kernel you want to use with jupyter.
 
-From the kernel's environment, run the following command: `[path_to_kernel_env]/bin/python -m ipykernel install --prefix=[path_to_jupyter_env] --name 'python[version]' --display-name 'Python [version]`
-
-The `--name` argument specifies the name of the newly created configuration subdirectory under the jupyter kernels folder described below. The `--display-name` argument just sets the value of the `display_name` key in the kernelspec.
+1. Install `ipykernel` within the kernel environment: `conda activate <kernel_env>; conda install ipykernel`
+2. From the kernel's environment, run the following command: `[path_to_kernel_env]/bin/python -m ipykernel install --prefix=[path_to_jupyter_env] --name 'python[version]' --display-name 'Python [version]`
+   - The `--name` argument specifies the name of the newly created configuration subdirectory under the jupyter kernels folder described below.
+   - The `--display-name` argument just sets the value of the `display_name` key in the kernelspec.
 
 #### Option 3: Create new kernel spec
 
@@ -214,3 +215,38 @@ Alternatively, the [scikit-image package](https://scikit-image.org/docs/dev/api/
 > <path_to_conda_env>\lib\site-packages\skimage\external\tifffile\tifffile.py:2618: RuntimeWarning: py_decodelzw encountered unexpected end of stream
 
 it still reads the TIFF file correctly.
+
+## Segmentation fault upon launching Python
+
+Story
+- Using WSL/Ubuntu to log into Caltech's HPC, where I had a clean install of miniconda3 in my HOME directory, I would experience a segmentation fault error from running
+  ```
+  conda activate base
+  python
+  ```
+  or running a Python script
+  ```
+  conda activate base
+  python myscript.py
+  ```
+  where `myscript.py` contained just 2 lines of code
+  ```
+  import pdb
+  pdb.set_trace()
+  ```
+- No segmentation fault occurred if I used PuTTY or the OnDemand Shell app to log into Caltech's HPC, or if I used a Python installation pre-loaded on Caltech's HPC via `module load python3/3.10.3`.
+
+Problem: The `LANG` environment variable, which was not set to `en_US.UTF-8`, was propagated from the local (WSL/Ubuntu) environment into the Caltech HPC environment.
+
+Solutions
+- Set the `LANG` environment variable correctly on the client side (WSL/Ubuntu) before connecting to the cluster.
+  ```
+  export LANG='en_US.UTF-8'
+  ssh login.hpc.caltech.edu
+  ```
+- Another potential solution (not verfied) would be to ensure that the `LANG` variable is properly set on the server side, such as by adding `export LANG='en_US.UTF-8'` this to `~/.bashrc` on the server.
+
+References
+- This has now been documented on Caltech HPC's Common Problems webpage: https://www.hpc.caltech.edu/documentation/common-problems
+
+<span style="color:red">Why/how does the `LANG` environment variable affect Python? Why/how does an improper value cause Python to segfault?</span>
