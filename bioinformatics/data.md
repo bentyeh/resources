@@ -71,3 +71,182 @@ Reference
 1. GDC Documentation: https://docs.gdc.cancer.gov/Encyclopedia/pages/TCGA_Barcode/
 2. TCGA Code Tables: https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables
 3. Wikipedia: https://en.wikipedia.org/wiki/The_Cancer_Genome_Atlas
+
+# NCBI Entrez and E-Utilities
+
+E-Direct command line tutorials
+- [NCBI Workshop: Accessing NCBI Biology Resources Using EDirect for Command Line Novices](https://www.nlm.nih.gov/ncbi/workshops/2023-07_intro-to-edirect/workshop-details.html)
+  - Jupyter Notebook: https://github.com/esallychang/CommandLine_EDirect_July2023
+- [NCBI Workshop: Downloading NCBI Biological Data and Creating Custom Reports Using the Command Line](https://www.nlm.nih.gov/ncbi/workshops/2023-04_custom-reports/workshop-details.html)
+  - Jupyter Notebook: https://github.com/esallychang/CommandLine_CustomData_April2023
+
+Other references
+- NCBI C++ Toolkit documentation: https://ncbi.github.io/cxx-toolkit/
+
+# NCBI Sequencing Read Archive (SRA)
+
+Accession prefixes (see https://www.ncbi.nlm.nih.gov/sra/docs/submitmeta/)
+- STUDY: `SRP#`
+- SAMPLE (`SRS#`): can be shared between STUDYs and between EXPERIMENTs.
+- EXPERIMENT (`SRX#`): main publishable unit in the SRA database
+  - Each EXPERIMENT represents a combination of biological replicate, library, sequencing strategy (e.g., targeted selection vs. unbiased), layout (e.g., paired end vs. single end), and instrument model.
+- RUN (`SRR#`): a "RUN is simply a manifest of data file(s) that are derived from sequencing a library described by the associated EXPERIMENT."
+  - "All data files listed in a RUN will be merged into a single \*.sra\* archive file."
+- SUBMISSION (`SRA#`; non-public accession)
+
+SRA data formats
+- References
+  - Overview: [SRA Documentation](https://www.ncbi.nlm.nih.gov/sra/docs/sra-data-formats/)
+  - Storage: [SRA Archive Documentation](https://www.ncbi.nlm.nih.gov/sra/docs/sra-data-storage-model/), [SRA Data Working Group 2021 report](https://dpcpsi.nih.gov/sites/default/files/3.20PM-SRA-Data-WG-Final-Report-Ardlie-Gregurick-508.pdf), and NLM Support (via email on 2024-08-08)
+- SRA Normalized Format (`*.sra`; aka extract-transform-load or ETL format): contains base calls, full base quality scores, and alignments
+  - Discards original read names [[SRA Toolkit GitHub](https://github.com/ncbi/sra-tools/wiki/Read-Names)]
+  - Storage: AWS (hot) via AWS Open Data Program --> free egress worldwide with anonymous identity
+- SRA Lite (`*.sralite`; aka ETL-BQS for ETL format without base quality scores): contains base calls, per-read quality flag, and alignments
+  - Discards original read names [[SRA Toolkit GitHub](https://github.com/ncbi/sra-tools/wiki/Read-Names)]
+  - The per-read quality flag (`Read_Filter`) is either `pass` or `reject`. See [SRA Documentation](https://www.ncbi.nlm.nih.gov/sra/docs/sra-data-formats/) for how the SRA determines whether a read passes the read filter.
+  - Storage
+    - NCBI servers: free egress worldwide with anonymous identity
+    - Cloud (AWS and GCP): hot; free egress to cloud services in the same geographical region
+- Originally submitted source files
+  - Storage: AWS, mostly cold storage
+
+Accessing SRA data
+- Web interface
+  - [Run Browser](https://www.ncbi.nlm.nih.gov/Traces/index.html?view=run_browser): Search by SRA Run Accession (`SRA#`) to see metadata, taxonomy analysis, read sequences, and data access information about the run, as well as a tool to download FASTA/FASTQ files for runs in the same SRA Experiment.
+    - The Data access tab indicates where the data is stored (NCBI, AWS, or GCP servers) and what types of egress is free.
+    - The FASTA/FASTQ download web interface only allows a limited download of <5 Gb of sequence over HTTP. [[SRA Documentation](https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/)]
+  - [Run Selector](https://www.ncbi.nlm.nih.gov/Traces/study/): Search by SRA, BioProject, BioSample, or GEO accessions to see all associated SRA Runs. Offers an interface to download metadata or retrieve the data from cold cloud storage to a cloud bucket.
+- AWS
+  - Buckets available through the Registry of Open Data (`s3://sra-pub-src-1/`, `s3://sra-pub-src-2/`, and `s3://sra-pub-run-odp/`; see [NIH NCBI Sequence Read Archive (SRA) on AWS](https://registry.opendata.aws/ncbi-sra/)) contain "hot" data that is free to download anonymously. Those buckets can be directly browsed anonymously using commands like
+    ```
+    aws s3 ls s3://sra-pub-src-1/ --no-sign-request
+    ```
+    and files can be downloaded directly via HTTP.
+    - Example: Consider [SRA Run DRR000110](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=DRR000110&display=data-access). The SRA Run Browser shows that the original FASTQ files are hosted in the S3 bucket `sra-pub-src-1` and available for anonymouse, free egress worldwide. One can list the raw files associated with that run via
+      ```
+      aws s3 ls s3://sra-pub-src-1/DRR000110/ --no-sign-request
+      ```
+      and download the files using a command like
+      ```
+      aws s3 cp s3://sra-pub-src-1/DRR000110 . --no-sign-request --recursive
+      ```
+      to copy the raw files `090324_30WB8AAXX_s_3_sequence.txt.tar.gz.1` and `090324_30WB8AAXX_s_4_sequence.txt.tar.gz.1` into the current working directory. Extracting those archives yields two FASTQ files `s_3_sequence.txt` and `s_4_sequence.txt`.
+        - As shown in the SRA Run Browser, the raw TAR archives can also be directly downloaded from their S3 buckets via HTTP.
+        - Instead of using the AWS CLI, the SRA Toolkit also supports downloading the raw data directly via the `--type` argument. See below.
+  - All other buckets that are shown in the Run Browser for any SRA Run appear to either be region-specific in their free egress support or host data in cold storage.
+- Downloading data from cold storage: use the "[Create a Data Delivery order](https://www.ncbi.nlm.nih.gov/Traces/cloud-delivery/)" page to retrieve the data into a user's cloud storage bucket. **This will incur cloud storage costs for the user.** The data can then be retrieved from the user cloud storage bucket, potentially incurring additional costs.
+  - Follow the instructions on the "[Create a Data Delivery order](https://www.ncbi.nlm.nih.gov/Traces/cloud-delivery/)" page to adjust bucket permissions. I successfully retrieved data using the following permissions settings with a new S3 bucket:
+    - Do not block public access (uncheck all "block public access" or "block all public access" boxes)
+    - Copy the automatically generated bucket policy (JSON text) from the "[Create a Data Delivery order](https://www.ncbi.nlm.nih.gov/Traces/cloud-delivery/)" page to the "Bucket policy" section of the Permissions tab of the bucket.
+    - Upon retrieval (which may take up to 48 hours), a metadata CSV file is deposited into the target bucket along with a folder (with the SRA Run accession as its name) containing the requested data.
+  - If logged into your MyNCBI account, the "[Create a Data Delivery order](https://www.ncbi.nlm.nih.gov/Traces/cloud-delivery/)" page will show the status of recent data delivery orders from the last 30 days.
+- Download data from hot storage: download using the SRA Toolkit or using cloud APIs
+  - Example: [SRA Run DRR310659](https://trace.ncbi.nlm.nih.gov/Traces/index.html?view=run_browser&acc=DRR310659&display=data-access), which is availabe in SRA Normalized Format on GCP at `gs://sra-pub-run-110/DRR310659/DRR310659.1` with free egress to `gs.us-east1`. (It is also available with free egress worldwide from NCBI servers, but for the sake of this example, we restrict ourselves to downloading from GCP.)
+    - To download using the SRA Toolkit specifically from the GCP bucket (as opposed to other servers):
+      ```
+      fasterq-dump --location gs://sra-pub-run-110/DRR310659/DRR310659.1 DRR310659
+      ```
+      - <span style="color:red">The `--location` argument is explained in the help of `fasterq-dump` version 3.0.0 but not the latest SRA Toolkit version 3.1.1.</span>
+    - To download using the `gcloud` CLI:
+      ```
+      gcloud storage --billing-project=<billing-project> cp gs://sra-pub-run-110/DRR310659/DRR310659.1 .
+      ```
+      where `<billing-project>` is a project ID shown under the "ID" column at https://console.cloud.google.com/billing/projects. This downloads a SRA Normalized Format file that can be converted to FASTQ and other formats via the SRA Toolkit programs, such as
+      ```
+      fasterq-dump ./DRR310659
+      ```
+    - Costs: Presumably if these commands are run within a Google Cloud virtual machine ([Cloud Shell](https://cloud.google.com/shell) or [Compute Engine](https://cloud.google.com/products/compute) instance) located in a `us-east1` region, then the download is free. However, if downloading to local premises, then an egress cost may be incurred.
+  - If originally submitted source files are available in hot storage, they can be downloaded directly using the SRA Toolkit by using the `--type` argument.
+    - Example: The Run Browser for [SRA Run DRR000110](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=DRR000110&display=data-access) lists the original format files as type `fastq`. We already previously explored how to download the raw files via HTTP or the AWS CLI. To download using the SRA Toolkit, run
+      ```
+      prefetch --type fastq DRR000110
+      ```
+      which will create a folder DRR000110 with the 2 raw data files inside: `090324_30WB8AAXX_s_3_sequence.txt.tar.gz` and `090324_30WB8AAXX_s_4_sequence.txt.tar.gz`.
+
+## SRA Toolkit
+
+Documentation: https://github.com/ncbi/sra-tools/wiki
+- Note (as of 2024-08-07): Because there are a lot of Wiki pages, some of them are initially hidden. Click on "Show 11 more pages..." to see all of them.
+
+Building from source: see https://github.com/ncbi/sra-tools/issues/937#issuecomment-2129704817
+
+```
+# set where to install the sratoolkit
+DIR_INSTALL="$HOME/local/sratoolkit"
+# set where to download source code and create build directory
+DIR_TMP="$HOME/tmp/scratch/sratoolkit_build"
+
+cd "$DIR_TMP"
+git clone https://github.com/ncbi/ncbi-vdb.git
+git clone https://github.com/ncbi/sra-tools.git
+mkdir build
+cd build
+cmake -S "$(cd ../ncbi-vdb; pwd)" -B ncbi-vdb
+cmake --build ncbi-vdb
+cmake -D VDB_LIBDIR="${PWD}/ncbi-vdb/lib" -D CMAKE_INSTALL_PREFIX="$DIR_INSTALL" -S "$(cd ../sra-tools; pwd)" -B sra-tools 
+cmake --build sra-tools --target install
+
+# binaries are installed to "$DIR_INSTALL/bin/
+```
+
+
+```
+DIR_WD="$(pwd -P)"
+mkdir sra_install
+mkdir sra_build
+mkdir sra_src
+cd sra_src
+git clone https://github.com/ncbi/ncbi-vdb.git
+git clone https://github.com/ncbi/sra-tools.git
+cd ncbi-vdb
+./configure --build-prefix="$DIR_WD/sra_build" --prefix="$DIR_WD/sra_install"
+make
+make install
+cd ../sra-tools
+./configure --build-prefix="$DIR_WD/sra_build" --prefix="$DIR_WD/sra_install"
+make
+make install
+
+# binaries are now available at "$DIR_WD/bin"
+```
+
+There are 2 basic ways to download data from the SRA with the SRA Toolkit:
+1. Prefetch and then extract to desired data type
+   - Tutorial: https://github.com/ncbi/sra-tools/wiki/08.-prefetch-and-fasterq-dump
+   - For in-depth documentation for the `fasterq-dump` tool, see the page [`HowTo: fasterq dump`](https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump`).
+2. On demand
+   - Tutorial: https://github.com/ncbi/sra-tools/wiki/Download-On-Demand
+
+
+While `prefetch` and `fasterq-dump` are the main programs, the SRA Toolkit comes with all of the following tools in the `bin` directory where it is installed. Some useful commands are indicated below.
+- `abi-dump`
+- `align-info`
+- `cache-mgr`
+- `check-corrupt`
+- `fasterq-dump`
+- `fastq-dump`
+- `illumina-dump`
+- `kcbmeta`
+- `ngs-pileup`
+- `prefetch`
+  - Use the `--max-size` argument to download more than 20 GB of data.
+- `rcexplain`
+- `ref-variation`
+- `sam-dump`
+- `sff-dump`
+- `sra-info`
+- `srapath`
+- `sra-pileup`
+- `sra-search`
+- `sra-stat`
+- `sratools`
+- `test-sra`
+- `var-expand`
+- `vdb-config`
+  - The full configuration of the toolkit can be viewed by running `vdb-config`. It appears that the interactive configuration settings from running `vdb-config -i` are saved to `~/.ncbi/user-settings.mkfg`.
+  - The interactive form of `vdb-config` does not expose all settings, some of which can only be set via the command line. See https://github.com/ncbi/sra-tools/wiki/06.-Connection-Timeouts.
+- `vdb-decrypt`
+- `vdb-dump`
+  - `vdb-dump --info <accession>`: show the size (in bytes) of the accession, among other information
+- `vdb-encrypt`
+- `vdb-validate`
