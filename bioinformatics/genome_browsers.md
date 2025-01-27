@@ -1,4 +1,13 @@
-# Directory Setup
+# NCBI Genome Data Viewer
+
+Video tutorials
+- https://www.youtube.com/playlist?list=PL7dF9e2qSW0b2vuZpBzu236O42_MVs49A
+- https://www.youtube.com/playlist?list=PL7dF9e2qSW0Zi1e8-SOhacAA4iSIhoOTw
+
+
+# IGV
+
+## Directory Setup
 
 igv-launcher_portable.bat: adapted from igv-launcher.bat with the following key changes
   1. Ignores `%USERPROFILE%/.igv/java_arguments`
@@ -14,7 +23,7 @@ data/:
 - igv0.log: log file
 - prefs.properties: preferences file
 
-# IGV Notes
+## IGV Notes
 
 Default behaviors of IGV version 2.13.2
 - If no genome is available in its data directory (see `--igvDirectory` argument; defaults to `"%USERPROFILE%/igv/"`), it will try to load hg19 from https://s3.amazonaws.com/igv.org.genomes/hg19/hg19.json.
