@@ -7,48 +7,44 @@ Consider a library of $M$ unique molecular species. Let subscript $i = 1, ..., M
 - Let $\pi_i$ denote the probability that an arbitrary read samples species $i$.
   - Generally, we assume uniform random sampling of reads from the library such that $\pi_i = \frac{c_i}{\sum_{j=1}^M c_j}$.
 - Let $x_i(T)$ be a random variable giving the number of reads for species $i$ obtained from $T$ total reads.
-  - Generally, we assume that $x_i$ are i.i.d. for all $i$. While this violates the constraint that $\sum_{i=1}^M x_i(T) = T$ (and relatedly, that $\sum_{i=1}^M \pi_i = 1$), this assumption should not significantly reduce accuracy of estimates in the regime that $x_i(T) \ll T$ for all $i$.
 
-### Poisson
+### Binomial / Poisson
 
-Assumption: all molecular species are equally represented - i.e., $\pi_i = 1 / M$ for all $i$.
+Problem: Given $d$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
 
-Problem: Given $D$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+Assumptions
+- All molecular species are equally represented - i.e., $\pi_i = 1 / M$ for all $i$.
+- $x_i$ are i.i.d. for all $i$.
+  - While this violates the constraint that $\sum_{i=1}^M x_i(T) = T$ (and relatedly, that $\sum_{i=1}^M \pi_i = 1$), this assumption should not significantly reduce accuracy of estimates in the regime that $x_i(T) \ll T$ for all $i$.
 
 Approach
-1. The expected number of reads per unique molecule is $\mathbb{E}(x_i) = \lambda = T / M$.
-   - The analogous Binomial formulation is $T$ trials with probability $1/M$ of sampling species $i$ on any given trial.
-2. The number of deduplicated molecules is $D = p(n \geq 1) \cdot M$.
+1. We model the number of reads for each species $i$ as a binomial distribution with $T$ trials with probability $1/M$ of sampling species $i$ on any given trial: $x_i \sim \mathrm{Binomial}(n = T, p = 1/M)$.
+   - The expected number of reads per species is $\mathbb{E}(x_i) = \lambda = T / M$.
+   - Since $T$ is large and $1/M$ is small, the binomial distribution is well approximated by the Poisson distribution $x_i \sim \mathrm{Poisson}(\lambda = T/M)$.
+   - Based on this model, the probability that a given species is observed at least once is
+   $$P(x_i > 0) = 1 - P(x_i = 0) = 1 - \frac{\lambda^0 e^{-\lambda}}{0!} = 1 - e^{-T/M}$$
+2. The number of observed unique species is $D = \sum_{i=1}^M \mathbb{1}\{x_i(T) > 0\}$. Since $x_i$ are i.i.d. for all $i$,
+   $$D \sim \mathrm{Binomial}(n = M, p = P(x_i > 0) = 1 - e^{-T/M})$$
+   - The expected value is $\mathbb{E}(D) = M (1 - e^{-T/M})$.
+   - For $T \ll M$, the Poisson approximation can be used: $D \sim \mathrm{Poisson}(\lambda = M (1 - e^{-T/M}))$.
 
-If we assume a Poisson distribution for $n$,
-$$p(n \geq 1) = 1 - p(n = 0) = 1 - \frac{\lambda^0 e^{-\lambda}}{0!} = 1 - e^{-\lambda} = 1 - e^{-T/M}$$
+#### Parameter estimation: maximum likelihood estimator (MLE)
 
-Then we obtain a non-linear equation with a single unknown, $M$:
-$$D = p(n \geq 1) \cdot M = (1 - e^{-T/M}) \cdot M$$
+We cannot obtain the MLE for the parameter $\lambda = T/M$ for the distribution $x_i \sim \mathrm{Poisson}(\lambda = T/M)$. This is because the MLE
+$$\hat{\lambda} = \frac{1}{M} \sum_{i=1}^M x_i(T)$$
+depends on $M$, whose value we do not know! In other words, this MLE approach requires knowing the counts for all species $i = 1, ..., M$, not just the non-zero counts of species that we observed.
 
-Solve numerically:
+When $T \ll M$, however, we can obtain the MLE for the parameter $\lambda = M (1 - e^{-T/M})$ for the distribution $D \sim \mathrm{Poisson}(\lambda = M (1 - e^{-T/M}))$. This is not a robust estimation, as we only have one observation of the random variable $D$, namely $d$. Consequently, the MLE (which in this case is also the method of moments estimator) is simply $\hat{\lambda} = d$. Thus, $d = M (1 - e^{-T/M})$. We can numerically solve this non-linear equation for $M$:
+
 ```{python}
 import scipy
-D = <some measured value>
+d = <some measured value>
 T = <some measured value>
 scipy.optimize.minimize_scalar(
-  fun=lambda M: (M * (1 - np.exp(-T/M)) - D)**2,
-  bracket=(D, T)
+  fun=lambda M: (M * (1 - np.exp(-T/M)) - d)**2,
+  bracket=(d, T)
 )
 ```
-
-<span style="color: red">Is this considered an MLE approach?</span>
-
-Conceptually, one might consider the following MLE approach:
-1. We observe read counts $x_i(T)$ for $i = 1, ..., D$ molecular species.
-2. We perform MLE for a Poisson distribution using these read counts. The MLE estimator of $\lambda$ is just the mean read count
-   $$\hat{\lambda} = \frac{1}{D} \sum_{i=1}^D x_i(T)$$
-3. Then, we estimate $\hat{M} = T / \hat{\lambda}$.
-
-This unfortunately does not work, since the MLE for a Poisson distribution requires knowing the counts for all species - i.e., the equation in step 2 above should be
-$$\hat{\lambda} = \frac{1}{M} \sum_{i=1}^M x_i(T)$$
-
-Unfortunately, we do not know what $M$ is (we are trying to solve for $M$). However, this conceptual approach can be adopted if we instead use a zero-truncated Poisson distribution instead.
 
 ### Zero-truncated Poisson
 
@@ -58,13 +54,15 @@ We can derive the probability mass function $g(k; \lambda)$ from a standard Pois
 
 $$
 g(k; \lambda)
-= P(X = k \mid X \gt 0)
+= P(x_i = k \mid x_i \gt 0)
 = \frac{f(k; \lambda)}{1 - f(0; \lambda)}
 = \frac{\lambda^k e^{-\lambda}}{k! (1 - e^{-\lambda})}
 = \frac{\lambda^k}{k! (e^\lambda - 1)}
 $$
 
-The mean is $\mathbb{E}(X) = \frac{\lambda}{1 - e^{-\lambda}}$.
+The mean is $\mathbb{E}(x_i) = \frac{\lambda}{1 - e^{-\lambda}}$.
+
+#### Parameter estimation: method of moments
 
 The method of moments estimator $\hat{\lambda}$ for parameter $\lambda$ (where $\lambda$ is the parameter of the underlying Poisson distribution) is obtained by solving the equation
 
@@ -72,7 +70,7 @@ $$
 \frac{\hat{\lambda}}{1 - e^{-\hat{\lambda}}} = \bar{x}
 $$
 
-where $\bar{x} = \sum_{i=1}^D x_i(T)$ is the sample mean *of the observed counts*.
+where $\bar{x} = \sum_{i=1}^d x_i(T)$ is the sample mean *of the observed counts*.
 
 Solve numerically:
 ```{python}
