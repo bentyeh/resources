@@ -48,9 +48,9 @@ scipy.optimize.minimize_scalar(
 
 ### Zero-truncated Poisson
 
-A zero-truncated Poisson distribution "is the conditional probability distribution of a Poisson-distributed random variable, given that the value of the random variable is not zero." [[Wikipedia](https://en.wikipedia.org/wiki/Zero-truncated_Poisson_distribution)]
+Problem: Given mean observed counts per species $\bar{x}$ obtained from $T$ total reads, estimate $M$.
 
-We can derive the probability mass function $g(k; \lambda)$ from a standard Poisson distribution $f(k; \lambda)$:
+A zero-truncated Poisson distribution "is the conditional probability distribution of a Poisson-distributed random variable, given that the value of the random variable is not zero." [[Wikipedia](https://en.wikipedia.org/wiki/Zero-truncated_Poisson_distribution)] We can derive the probability mass function $g(k; \lambda)$ from a standard Poisson distribution $f(k; \lambda)$:
 
 $$
 g(k; \lambda)
