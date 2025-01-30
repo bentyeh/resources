@@ -3,10 +3,12 @@
 Motif matrices $\in [0,1]^{W \times L}$
 - Consider $N$ aligned sequences of length $W$ generated from an alphabet of size $L$ contributing to the motif matrix. Let $b = (b_1, ..., b_L)$ be the background probabilities.
 - Types
-    - $C$: position frequencey matrix (PFM): counts
+    - $C$: position frequency matrix (PFM): counts
     - $F$: position(-specific) probability matrix (PPM, PSPM): probabilities
     - $S$: position(-specific) weight/scoring matrix (PWM, PSWM, PSSM): weights, often given as log-likelihoods (aka log-odds) with added pseudocounts
-$$ S_{ij} = \log \frac{\text{observed}}{\text{expected}} = \log \frac{C_{ij}}{N b_j} = \log \frac{f_{ij}}{b_j} \approx \log \frac{C_{ij} + 1}{(N + 1) b_j}$$
+
+$$ S_{ij} = \log \frac{\text{observed}}{\text{expected}} = \log \frac{C_{ij}}{N b_j} = \log \frac{f_{ij}}{b_j} \approx \log \frac{C_{ij} + 1}{(N + 1) b_j} $$
+
 - Assumption: each column/position is an independent multinomial distribution
   - The probability of a sequence $x$ given a PPM $F$ is the multiplication of the relevant probabilities at each position:
 
@@ -25,13 +27,17 @@ References
 # Motif-finding programs
 
 Score $s$ for a PPM $F$ and sequence $x$ (used by FIMO, MAST, and HOMER):
-$$\begin{aligned}
+
+```math
+\begin{aligned}
 s(x, F) &= \sum_{i=1}^W \sum_{j=1}^L S_{ij}^{I(j, x_i)} \\
 &= \sum_{i=1}^W \sum_{j=1}^L \left(\log \frac{f_{ij}}{b_j} \right)^{I(j, x_i)} \\
 &= \sum_{i=1}^W \sum_{j=1}^L \log \left(\frac{f_{ij}}{b_j} \right)^{I(j, x_i)} \\
 &= \log \left(\Pi_{i=1}^W \Pi_{j=1}^L \left(\frac{f_{ij}}{b_j}\right)^{I(j, x_i)} \right) \\
 &= \log {p(x \mid F')} \text{, where } F'_{ij}=\frac{f_{ij}}{b_j}
-\end{aligned}$$
+\end{aligned}
+```
+
 - Note: [HOMER](http://homer.ucsd.edu/homer/motif/creatingCustomMotifs.html) fixes $b_j = 0.25$
 
 Score threshold for classifying a sequence as containing the motif or not
