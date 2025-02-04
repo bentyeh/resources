@@ -1,3 +1,99 @@
+- [How-Tos](#how-tos)
+  - [Convert between chromosome names](#convert-between-chromosome-names)
+  - [Which genome assembly to use for alignment](#which-genome-assembly-to-use-for-alignment)
+- [ENCODE](#encode)
+  - [ENCODE Blacklists](#encode-blacklists)
+- [UCSC](#ucsc)
+- [NCI Genomic Data Commons](#nci-genomic-data-commons)
+  - [Searching and filtering data](#searching-and-filtering-data)
+  - [TCGA Barcode](#tcga-barcode)
+- [NCBI Entrez and E-Utilities](#ncbi-entrez-and-e-utilities)
+- [NCBI Sequencing Read Archive (SRA)](#ncbi-sequencing-read-archive-sra)
+  - [SRA Toolkit](#sra-toolkit)
+
+# How-Tos
+
+## Convert between chromosome names
+
+Conversion tables
+- NCBI genome assembly reports: assembly name <> GenBank accession <> RefSeq accession <> UCSC
+  - "assembly name" is the my term for the `Sequence-Name` column in the assembly reports; these names appear in the FASTA comment of NCBI Nucleotide entries and are also used by Ensembl for alternate loci, novel patches, and fix patches (see below)
+  - Example (human GRCh38): https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.29_GRCh38.p14/GCA_000001405.29_GRCh38.p14_assembly_report.txt
+  - Example (mouse GRCm39): https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.27_GRCm39/GCF_000001635.27_GRCm39_assembly_report.txt
+- UCSC chromAlias: Ensembl <> RefSeq accesion <> UCSC (and possibly more)
+  - This is present in 2 formats:
+    - <a name="chromAlias.txt.gz"></a>`<genome path>/database/chromAlias.txt.gz`: a long-form table, with each row representing a single conversion between a UCSC-style name and another style name
+    - <a name="genome.chromAlias.txt"></a>`<genome path>/bigZips/<genome>.chromAlias.txt`: a wide-form table, with each row representing a single chromosome and columns giving all the different names for that chromosome
+
+Format for mouse and human genomes
+- NCBI GenBank: accessions
+  - Human: chromosomes 1-22, X, and Y = CM000[663-686].[version]
+  - Mouse: chromosomes 1-19, X, and Y = CM00[0994-1014].[version]
+  - Accessions for mitochondrial chromosomes and non-reference chromosomes/scaffolds (alternate loci, unlocalized scaffolds, unplaced scaffolds, fix patches, and novel patches) do not follow a linear ordering.
+- NCBI RefSeq: accessions
+  - Human: chromosomes 1-22, X, and Y = NC_00000[1-24].[version]
+  - Mouse: chromosomes 1-19, X, and Y = NC_0000[67-87].[version]
+  - Accessions for mitochondrial chromosomes and non-reference chromosomes/scaffolds do not follow a linear ordering.
+- Ensembl
+  - Reference chromsomes: 1-22 (human) or 1-19 (mouse) + X + Y+ MT
+  - Alternate loci, novel patches, fix patches: assembly name
+  - Unlocalized scaffolds and unplaced scaffolds: GenBank accession
+- [UCSC](#UCSC)
+  - reference chromosomes: `chr[#|X|Y|M]`
+  - unlocalized scaffolds, alternate loci scaffolds, fix loci scaffolds: `chr[#|X|Y|M]_[GenBank accession]v[GenBank version]_[random|alt|fix]`
+  - unplaced scaffolds: `chrUn_[GenBank accession]v[GenBank version]`
+- (human and mouse only) GENCODE
+  - reference chromosomes: UCSC-style `chr[#|X|Y|M]`
+  - non-reference chromosomes/scaffolds: GenBank accession.version
+
+GRCh38.p14 notes (see also [Google Colab notebook](https://colab.research.google.com/drive/12ioyAoyZIrIFSPPE4TiclMM-1unUquFO))
+- GenBank assembly accessions start with "GCA", while RefSeq assembly accessions start with "GCF".
+- History: GRCh38 initial release in 2013 (GCA_000001405.15, GCF_000001405.26) contained 455 sequences (25 reference chromosomes + 127 unplaced scaffolds + 42 unlocalized scaffolds + 261 alternate loci). By Patch 14 (GCF_000001405.40, GCA_000001405.29), 4 GenBank accessions (described below) were dropped from the RefSeq assembly, while 164 fix patches and 90 novel patches have been added, for a total of 709 GenBank accessions and 705 RefSeq accessions.
+  - `KI270752.1` (unplaced scaffold): dropped in patch 13 from the RefSeq assembly "because it is hamster sequence derived from the human-hamster CHO cell line" [[UCSC hg38 bigZip](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)]
+    - This sequence is still kept in the NCBI GenBank assembly. "Removal of this sequence from the GenBank assembly can only be done at the time of a new major assembly release." [[GRC Issue HG-2587](https://www.ncbi.nlm.nih.gov/grc/human/issues/HG-2587)]
+  - `KI270825.1` (alternate locus), `KI270721.1` (unlocalized scaffold), `KI270734.1` (unlocalized scaffold): "contamination or obsolete" sequences dropped in patch 14 from the RefSeq assembly [[UCSC hg38 bigZip](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)]
+- Comparison with other assemblies to NCBI GenBank
+  - NCBI RefSeq: excludes the 4 sequences above
+  - Ensembl release 113: contains the 4 sequences above but excludes 3 fix patches `MU273354.1`, `KN538374.1`, and `MU273386.1`
+  - UCSC: excludes the 4 sequences above, but contains 2 extra sequences `KQ759759.1` and `KQ759762.2`
+    - `KQ759759` and `KQ759762` (fix patches) were updated from version 1 to version 2 in patch 14
+    - "Because of the difficulty of removing the old chroms chr11_KQ759759v1_fix and chr22_KQ759762v1_fix from all of the database tables and bigData files, custom tracks, and hubs, we are not dropping them from the UCSC hg38 patch 14 .2bit and chromInfo. However, we have dropped them from chromAlias to accord with the Genbank and Refseq official releases for patch14." [[UCSC hg38 bigZip](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)]
+  - GENCODE: many non-reference sequences have no annotations
+
+## Which genome assembly to use for alignment
+
+References
+- https://lh3.github.io/2017/11/13/which-human-reference-genome-to-use
+- https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/README_analysis_sets.txt
+- https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/
+
+General guidelines
+- Unless the aligner is "ALT-aware" and can appropriately use alternate loci sequences, do not include the alternate loci sequences in alignment indices.
+- Include the unplaced and unlocalized scaffolds
+  - This will prevent false alignment of reads from those genomic regions to the reference chromosomes.
+- Hard-mask duplicate regions
+  - Example (human genome): the two PAR regions on chromosome Y, and duplicate copies of centromeric arrays and WGS on chromosomes 5, 14, 19, 21 & 22
+- An Epstein-Barr virus (EBV) sequence is often included "as a sink for alignment of reads that are often present in sequencing samples."
+
+FASTA sequences and indices following these guidelines are termed "analysis sets":
+- GRCh38.p14: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/
+- GRCm39: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.27_GRCm39/seqs_for_alignment_pipelines/
+- GRCm38 (mm10): use the initial assembly release sequences, which contains no alternate loci [[UCSC mm10 bigZips](https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/)]
+- T2T CHM13: ??
+  - The [NCBI FTP folder for the T2T CHM13 genome](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/) does not contain an analysis set.
+  - Bowtie 2 (see the sidebar on the [manual webpage](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)) provides an index, but it is not masked. Consequently, would reads originating from repetitive/duplicate regions simply fail to align?
+
+# Genome annotations
+
+Human genome
+- Single representative transcripts per gene: Ensembl Canonical and RefSeq Select are supersets of MANE Select
+  - MANE Select = set of Ensembl Canonical and RefSeq Select transcripts that are annotated identically in the RefSeq and the Ensembl-GENCODE gene sets and perfectly align to GRCh38
+  - ([Ensembl release 112](https://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz) or [GENCODE release v46](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/gencode.v46.primary_assembly.annotation.gtf.gz)) All transcripts tagged with "MANE_Select" are also tagged with "Ensembl Canonical"
+  - ([RefSeq release GCF_000001405.40-RS_2023_10](https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/annotation_releases/GCF_000001405.40-RS_2023_10/GCF_000001405.40_GRCh38.p14_genomic.gtf.gz)) Transcripts tagged with "MANE Select" are not additionally tagged with "RefSeq Select"
+  - Versioning
+    - MANE --> Ensembl and NCBI releases: see README of MANE releases on NCBI's FTP server: https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/
+    - GENCODE <--> Ensembl version mapping can be found on GENCODE's website: https://www.gencodegenes.org/human/releases.html
+
 # ENCODE
 
 ## ENCODE Blacklists
@@ -27,17 +123,20 @@ Download site: https://hgdownload.soe.ucsc.edu/downloads.html
 Genome-specific data: `https://hgdownload.soe.ucsc.edu/goldenPath/<genome>/`
 - Example: Human GRCh38 = https://hgdownload.soe.ucsc.edu/goldenPath/hg38/
 - Structure
-  - chromosomes/: a FASTA file for each chromosome
+  - chromosomes/: a FASTA file for each chromosome/scaffold from the initial genome assembly release (i.e., without any patches)
   - database/: annotations
     - RepeatMasker tracks
       - rmsk.txt.gz: source unclear (not described in the GitHub repo)
       - rmskAlign* and rmskOut*: very similar, except that Align corresponds to the ".align" file generated by RepeatMasker that shows the alignments between the repeat and query sequence, which is missing from the ".out" file. rmskOut* appears to be the main annotation file to use.
       - rmsk\*Baseline vs. rmsk\*Current: based on the GitHub repo, appear to correspond to older vs. newer annotations
       - rmskJoined*: a "RepeatMasker Visualization track" (unclear)
+    - [chromAlias.txt.gz](#chromAlias.txt.gz)
     - ... many others ...
   - bigZips/: genome, selected annotation files and updates
+    > "Files in this directory reflect the initial... release of the genome, the most current versions are in the "latest/" subdirectory"
     - RepeatMasker-masked genome FASTA files
-    - hg38.chrom.sizes
+    - \<genome\>.chrom.sizes
+    - [\<genome\>.chromAlias.txt](#genome.chromAlias.txt)
     - (Updated regularly) RefSeq mRNA multi-FASTA files
     - (Updated regularly) upstream1000/2000/5000: sequences 1000/2000/5000 bases upstream of annotated TSSs of RefSeq genes with annotated 5' UTRs.
 
