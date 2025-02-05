@@ -1,8 +1,8 @@
 - [How-Tos](#how-tos)
   - [Convert between chromosome names](#convert-between-chromosome-names)
   - [Which genome assembly to use for alignment](#which-genome-assembly-to-use-for-alignment)
-- [ENCODE](#encode)
-  - [ENCODE Blacklists](#encode-blacklists)
+  - [Choosing blacklist regions](#choosing-blacklist-regions)
+- [Genome annotations](#genome-annotations)
 - [UCSC](#ucsc)
 - [NCI Genomic Data Commons](#nci-genomic-data-commons)
   - [Searching and filtering data](#searching-and-filtering-data)
@@ -83,26 +83,17 @@ FASTA sequences and indices following these guidelines are termed "analysis sets
   - The [NCBI FTP folder for the T2T CHM13 genome](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/) does not contain an analysis set.
   - Bowtie 2 (see the sidebar on the [manual webpage](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)) provides an index, but it is not masked. Consequently, would reads originating from repetitive/duplicate regions simply fail to align?
 
-# Genome annotations
+## Choosing blacklist regions
 
-Human genome
-- Single representative transcripts per gene: Ensembl Canonical and RefSeq Select are supersets of MANE Select
-  - MANE Select = set of Ensembl Canonical and RefSeq Select transcripts that are annotated identically in the RefSeq and the Ensembl-GENCODE gene sets and perfectly align to GRCh38
-  - ([Ensembl release 112](https://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz) or [GENCODE release v46](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/gencode.v46.primary_assembly.annotation.gtf.gz)) All transcripts tagged with "MANE_Select" are also tagged with "Ensembl Canonical"
-  - ([RefSeq release GCF_000001405.40-RS_2023_10](https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/annotation_releases/GCF_000001405.40-RS_2023_10/GCF_000001405.40_GRCh38.p14_genomic.gtf.gz)) Transcripts tagged with "MANE Select" are not additionally tagged with "RefSeq Select"
-  - Versioning
-    - MANE --> Ensembl and NCBI releases: see README of MANE releases on NCBI's FTP server: https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/
-    - GENCODE <--> Ensembl version mapping can be found on GENCODE's website: https://www.gencodegenes.org/human/releases.html
-
-# ENCODE
-
-## ENCODE Blacklists
-
-References
-- Paper: Amemiya HM, Kundaje A, Boyle AP. The ENCODE Blacklist: Identification of Problematic Regions of the Genome. *Sci Rep*. 2019;9(1):9354. Published 2019 Jun 27. doi:[10.1038/s41598-019-45839-z](https://doi.org/10.1038/s41598-019-45839-z)
+Referencess
+- Papers
+  - Amemiya HM, Kundaje A, Boyle AP. The ENCODE Blacklist: Identification of Problematic Regions of the Genome. *Sci Rep*. 2019;9(1):9354. Published 2019 Jun 27. doi:[10.1038/s41598-019-45839-z](https://doi.org/10.1038/s41598-019-45839-z)
+  - Ogata JD, Mu W, Davis ES, et al. excluderanges: exclusion sets for T2T-CHM13, GRCm39, and other genome assemblies. *Bioinformatics*. 2023;39(4):btad198. doi:[10.1093/bioinformatics/btad198](https://doi.org/10.1093/bioinformatics/btad198)
 - Anshul Kundaje's webpage: https://sites.google.com/site/anshulkundaje/projects/blacklists
 - ENCODE Annotation File Set: https://www.encodeproject.org/annotations/ENCSR636HFF/
 - Boyle lab GitHub repo: https://github.com/Boyle-Lab/Blacklist
+
+Below, I've compiled blacklists from ENCODE and associated labs (Anshul Kundaje and the Boyle lab). For a more comprehensive and updated table of blacklists, see the [`excluderanges` package](https://dozmorovlab.github.io/excluderanges).
 
 | Genome | Blacklist version | Links |
 | ------ | ----------------- | ----- |
@@ -116,15 +107,40 @@ References
 
 \* Confusingly, [Anshul Kundaje's webpage](https://sites.google.com/site/anshulkundaje/projects/blacklists) lists the hg19 annotation file [ENCFF001TDO](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz) as both Version 1 and Version 3. The file is identical to Version 1 of the hg19 blacklist on the Boyle Lab GitHub.
 
+# Genome annotations
+
+Human genome
+- Single representative transcripts per gene: Ensembl Canonical and RefSeq Select are supersets of MANE Select
+  - MANE Select = set of Ensembl Canonical and RefSeq Select transcripts that are annotated identically in the RefSeq and the Ensembl-GENCODE gene sets and perfectly align to GRCh38
+  - ([Ensembl release 112](https://ftp.ensembl.org/pub/release-112/gtf/homo_sapiens/Homo_sapiens.GRCh38.112.gtf.gz) or [GENCODE release v46](https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/gencode.v46.primary_assembly.annotation.gtf.gz)) All transcripts tagged with "MANE_Select" are also tagged with "Ensembl Canonical"
+  - ([RefSeq release GCF_000001405.40-RS_2023_10](https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/annotation_releases/GCF_000001405.40-RS_2023_10/GCF_000001405.40_GRCh38.p14_genomic.gtf.gz)) Transcripts tagged with "MANE Select" are not additionally tagged with "RefSeq Select"
+  - Versioning
+    - MANE --> Ensembl and NCBI releases: see README of MANE releases on NCBI's FTP server: https://ftp.ncbi.nlm.nih.gov/refseq/MANE/MANE_human/
+    - GENCODE <--> Ensembl version mapping can be found on GENCODE's website: https://www.gencodegenes.org/human/releases.html
+
+
 # UCSC
 
 Download site: https://hgdownload.soe.ucsc.edu/downloads.html
 
-Genome-specific data: `https://hgdownload.soe.ucsc.edu/goldenPath/<genome>/`
-- Example: Human GRCh38 = https://hgdownload.soe.ucsc.edu/goldenPath/hg38/
-- Structure
+UCSC Servers (US server URLs provided; see UCSC Genome Browser's documentation for URLs for servers in Europe and elsewhere)
+- HTTP server: `hgdownload.soe.ucsc.edu/`
+- FTP server: `ftp://hgdownload.soe.ucsc.edu`
+- MariaDB (MySQL) server: `genome-mysql.soe.ucsc.edu`
+
+Organization of directories accessible on HTTP and FTP servers
+- `goldenPath` (`https://hgdownload.soe.ucsc.edu/goldenPath/<genome>` or `ftp://hgdownload.soe.ucsc.edu/goldenPath/<genome>`): UCSC genome annotations [[UCSC Genome Browser User Guide](https://genome.ucsc.edu/goldenPath/help/hgTracksHelp.html#Download)]
+  - Files in this directory are largely descriptive (showing where things are along the genome) rather than numeric.
+    - Exceptions: conservation scores (under the `phyloP[#]way` and `phastCons[#]way` directories)
+  - bigZips/: genome sequence, selected annotation files and updates
+    > "Files in this directory reflect the initial... release of the genome, the most current versions are in the "latest/" subdirectory"
+    - RepeatMasker-masked genome FASTA files
+    - \<genome\>.chrom.sizes
+    - [\<genome\>.chromAlias.txt](#genome.chromAlias.txt)
+    - (Updated regularly) RefSeq mRNA multi-FASTA files
+    - (Updated regularly) upstream1000/2000/5000: sequences 1000/2000/5000 bases upstream of annotated TSSs of RefSeq genes with annotated 5' UTRs.
   - chromosomes/: a FASTA file for each chromosome/scaffold from the initial genome assembly release (i.e., without any patches)
-  - database/: annotations
+  - database/: annotation tables, where each table is represented by a `.sql` file containing the SQL commands used to create the table and a `.txt.gz` file of the table data in tab-delimited format. Schema descriptions can be found by selecting the relevant dataset and clicking the "Data format description" button in the [Table Browser](https://genome.ucsc.edu/cgi-bin/hgTables).
     - RepeatMasker tracks
       - rmsk.txt.gz: source unclear (not described in the GitHub repo)
       - rmskAlign* and rmskOut*: very similar, except that Align corresponds to the ".align" file generated by RepeatMasker that shows the alignments between the repeat and query sequence, which is missing from the ".out" file. rmskOut* appears to be the main annotation file to use.
@@ -132,13 +148,10 @@ Genome-specific data: `https://hgdownload.soe.ucsc.edu/goldenPath/<genome>/`
       - rmskJoined*: a "RepeatMasker Visualization track" (unclear)
     - [chromAlias.txt.gz](#chromAlias.txt.gz)
     - ... many others ...
-  - bigZips/: genome, selected annotation files and updates
-    > "Files in this directory reflect the initial... release of the genome, the most current versions are in the "latest/" subdirectory"
-    - RepeatMasker-masked genome FASTA files
-    - \<genome\>.chrom.sizes
-    - [\<genome\>.chromAlias.txt](#genome.chromAlias.txt)
-    - (Updated regularly) RefSeq mRNA multi-FASTA files
-    - (Updated regularly) upstream1000/2000/5000: sequences 1000/2000/5000 bases upstream of annotated TSSs of RefSeq genes with annotated 5' UTRs.
+- `gbdb` (`https://hgdownload.soe.ucsc.edu/gbdb/` or `ftp://hgdownload.soe.ucsc.edu/gbdb/`): bigBeds/bigWigs/BAMs and other binary files [[UCSC Genome Browser Blog](https://genome-blog.gi.ucsc.edu/blog/2018/07/20/accessing-the-genome-browser-programmatically-part-2-using-the-public-mysql-server-and-gbdb-system)]
+  - This includes essentially all functional genomics data, such as expression (e.g., RNA-seq data from the FANTOM and GTEx projects), transcription factor binding (e.g., ChIP-seq data from ENCODE and ReMap), and chromatin accessibility (e.g., DNase HS signal from ENCODE).
+  - Integration of 3rd-party data: TCGA, variant effect prediction scores (e.g., from CADD), aberrant splicing scores (e.g., from AbSplice)
+  - Other numeric tracks: GC content
 
 Provenance of files: https://github.com/ucscGenomeBrowser/kent/tree/master/src/hg/makeDb/doc
 - Example: code for main Human GRCh38 annotations = https://github.com/ucscGenomeBrowser/kent/blob/master/src/hg/makeDb/doc/hg38/hg38.txt
