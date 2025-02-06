@@ -79,7 +79,7 @@ FASTA sequences and indices following these guidelines are termed "analysis sets
 - GRCh38.p14: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/
 - GRCm39: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.27_GRCm39/seqs_for_alignment_pipelines/
 - GRCm38 (mm10): use the initial assembly release sequences, which contains no alternate loci [[UCSC mm10 bigZips](https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/)]
-- T2T CHM13: ??
+- T2T CHM13: https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/CHM13/assemblies/analysis_set/ (as pointed to in the [T2T CHM13 GitHub README](https://github.com/marbl/CHM13))
   - The [NCBI FTP folder for the T2T CHM13 genome](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/) does not contain an analysis set.
   - Bowtie 2 (see the sidebar on the [manual webpage](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)) provides an index, but it is not masked. Consequently, would reads originating from repetitive/duplicate regions simply fail to align?
 
@@ -99,9 +99,9 @@ Below, I've compiled blacklists from ENCODE and associated labs (Anshul Kundaje 
 | ------ | ----------------- | ----- |
 | hg19   | v1                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg19-blacklist.bed.gz), [ENCODE](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz)* |
 | hg19   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg19-blacklist.v2.bed.gz) |
-| GRCh38 | v1                | [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/hg38-human/hg38.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg38-blacklist.bed.gz) |
-| GRCh38 | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg38-blacklist.v2.bed.gz) |
-| GRCh38 | v3                | [ENCODE](https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz) |
+| hg38   | v1                | [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/hg38-human/hg38.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg38-blacklist.bed.gz) |
+| hg38   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg38-blacklist.v2.bed.gz) |
+| hg38   | v3                | [ENCODE](https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz) |
 | mm10   | v1                | [ENCODE](https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz), [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/mm10-mouse/mm10.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/mm10-blacklist.bed.gz) |
 | mm10   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/mm10-blacklist.v2.bed.gz)
 
