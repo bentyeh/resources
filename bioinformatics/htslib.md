@@ -31,6 +31,9 @@ http://www.htslib.org/doc/samtools.html
 
 ### FAQ
 
+Pysam `AlignmentFile()` read modes
+- > The underlying HTSlib `hts_open()` call has ignored any mode file type letters after `r` since 2013. [[Pysam GitHub issue 655](https://github.com/pysam-developers/pysam/issues/655#issuecomment-596180666)]
+
 **Specifying output file**\
 Only output to `stdout`: flagstat, idxstats, stats\
 Specify output with `-o`: view, mpileup
