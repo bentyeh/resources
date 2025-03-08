@@ -44,6 +44,29 @@ Score threshold for classifying a sequence as containing the motif or not
 - MEME: 
 - HOMER: 
 
+# SEA
+
+Bailey TL, Grant CE. SEA: Simple Enrichment Analysis of motifs. *bioRxiv*; 2021. doi:[10.1101/2021.08.23.457422v1](https://doi.org/10.1101/2021.08.23.457422v1).
+
+Output files
+- sequences.tsv
+  - Each row represents a sequence-motif pair where the motif score for that sequence reaches the score threshold for that motif (which is reported in sea.tsv and sea.html). Consequently, each row is a "positive" sequence.
+    - A "false positive" (fp) sequence is a control sequence. If no specific set of control sequences was provided via the `--n` option, SEA uses shuffled input sequences as the control set. It seems like SEA retains the names of the original input sequences in the control set.
+    - A "true positive" (tp) sequence is a "primary" user-provided sequence.
+    - In sea.tsv/sea.html, the TP number for a motif is the number of true positive, non-holdout rows in sequences.tsv. The FP number for a motif is the number of false positive, non-holdout rows in sequences.tsv. The denominator is the number non-holdout primary sequences (90% of the "primary" sequences, unless the number of primary sequences was too low); this denominator is reported in sea.html.
+- sea.tsv / sea.html
+  - P-value calculation
+    - If the primary and control sequences are of the same length, SEA uses Fisher's exact test to calculate a p-value:
+
+      ```
+      scipy.stats.fisher_exact(
+        [[tp, n_primary_non_holdout - tp],
+         [fp, n_control_non_holdout - fp]],
+        alternative='greater'
+      ).pvalue
+      ```
+    - If the primary and control sequences are not of the same length, SEA uses a Binomial distribution. See the SEA preprint methods section for details.
+
 # Bailey and Elkan. Fitting a Mixture Model by Expectation Maximization to Discover Motifs in Biopolymers
 
 References

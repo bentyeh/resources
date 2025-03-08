@@ -21,7 +21,8 @@ European Molecular Biology Laboratory
 
 # Tutorials
 
-Harvard Chan Bioinformatics Core Training
+Harvard Chan Bioinformatics Core Training: https://hbctraining.github.io/main/
+- While most lessons are in HTML format available through links on the training website, some are only availble as markdown files on in underlying GitHub repos: https://github.com/hbctraining
 - [In-depth NGS Data Analysis Course](https://github.com/hbctraining/In-depth-NGS-Data-Analysis-Course)
   - Differential gene expression analysis
   - Functional analysis and other RNA-seq applications
@@ -42,9 +43,15 @@ Mapping IDs
   - UniProt mapping by organism: ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz
 
 Canonical transcripts and proteins for a given gene
+- Ensembl Canonical transcript: "a single, representative transcript identified at every locus" [[Ensembl](https://www.ensembl.org/info/genome/genebuild/canonical.html)]
+- RefSeq Select transcript: single representative transcript for every protein-coding gene [[RefSeq Select](https://www.ncbi.nlm.nih.gov/refseq/refseq_select)]
+  - First incorporated into RefSeq release 94 in May 2019 [[RefSeq release notes](https://ftp.ncbi.nlm.nih.gov/refseq/release/release-notes/archive/RefSeq-release94.txt); [NCBI Insights Blog](https://ncbiinsights.ncbi.nlm.nih.gov/2019/05/17/refseq-release-94-with-mane-and-refseq-select-markup-protein-name-evidence-and-improved-candida-auris-assembly/)]
+  - Currently available for human, mouse, rat, and prokaryotic genomes
+  - Matched Annotation from NCBI and EMBL-EBI (MANE): set of human transcripts that are annotated identically in the RefSeq and the Ensembl-GENCODE gene sets and perfectly align to GRCh38; subset of the intersection of RefSeq Select and Ensembl Canonical transcripts.
 - UniProt reference proteome
-- UCSC knownCanonical track
-- https://groups.google.com/a/soe.ucsc.edu/forum/#!msg/genome/_6asF5KciPc/bWn4g3vCFAAJ
+- Outdated
+  - UCSC knownCanonical track
+  - https://groups.google.com/a/soe.ucsc.edu/forum/#!msg/genome/_6asF5KciPc/bWn4g3vCFAAJ
 
 # References
 
