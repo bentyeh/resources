@@ -91,16 +91,37 @@ Is one approach more "correct" than the other? Any guidance is greatly appreciat
 Finding motifs
 - log p-values outputed by findMotifs.pl in knownResults.txt or any of the \*.motif file outputs is the *natural* log p-value (source: compare p-value and log p-value of outputs)
 - The hypergeometric p-value is calculated based on *estimates* of the number of sequences containing the motif in the target and background sets. Estimates are calculated identically but separately for target and background sets.
-  - Let $N$ be the number of total sequences (either in the target or background set). Let $k_i$ be the estimated number of sequences containing the motif (regardless of multiplicity) given the presence of $i$ matching instances (oligos) in $N$ total sequences. Then $k_i$ is computed recursively as
+  - Let $n$ be the number of total sequences (either in the target or background set). Let $k_i$ be the estimated number of sequences containing the motif (such sequences can contain the motif 1 or more times) given the presence of $i$ matching instances (oligos) in $N$ total sequences. Then $k_i$ is computed recursively as
 
     $$
     \begin{aligned}
     k_1 &= 1 \\
-    k_i &= k_{i-1} + \frac{N - k_{i-1}}{N}
+    k_i &= k_{i-1} + \frac{n - k_{i-1}}{n}
     \end{aligned}
     $$
 
     This is why the "Number of Target/Background Sequences with motif" reported in homerResults/motif[#].info.html (*de novo* motifs) or knownResults.html (known motifs) are not necessarily integers and may be decimal numbers. When calcuating the hypergeometric p-value, these counts are rounded to the nearest integer.
+  - Using these estimated number of sequences containing the motif, a 2x2 table can be constructed:
+
+    |            | motif                 | no motif  | total |
+    | ---------- | --------------------- | --------- | ----- |
+    | Target     | $\hat{k}_\mathrm{target}$ | $n_\mathrm{target} - \hat{k}_\mathrm{target}$ | $n_\mathrm{target}$ |
+    | Background | $\hat{k}_\mathrm{bg}$ | $n_\mathrm{bg} - \hat{k}_\mathrm{bg}$ | $n_\mathrm{bg}$ |
+    | total      | $K = \hat{k}_\mathrm{target}$ + $\hat{k}_\mathrm{bg}$ | $n_\mathrm{target} + n_\mathrm{bg} - \hat{k}_\mathrm{target} - \hat{k}_\mathrm{bg}$ | $N = n_\mathrm{target} + n_\mathrm{bg}$
+
+    The p-value represents $P(k \geq \hat{k}_\mathrm{target} \mid N, K, n_\mathrm{target})$.
+    - An implementation in Python + scipy is provided below for an example motif occuring in $\hat{k}_\mathrm{target} = 15$ out of $n_\mathrm{target} = 40$ target sequences and $\hat{k}_\mathrm{bg} = 95$ out of $n_\mathrm{bg} = 1635$ background sequences.
+
+      ```{python}
+      k = 15
+      n = 40
+      K = 15 + 95
+      N = 1635 + 40
+      pvalue = 1 - scipy.stats.hypergeom.cdf(k - 1, N, n, K)
+      # equivalently, scipy.stats.hypergeom.sf(k - 1, N, n, K)
+      # equivalently, scipy.stats.fisher_exact([[k, n-k], [K - k, N - n - (K - k)]], alternative='greater').pvalue
+      ```
+
   - Reference: [http://homer.ucsd.edu/homer/introduction/motifDetails.html](http://homer.ucsd.edu/homer/introduction/motifDetails.html)
 - The "Consensus" sequence in knownResults.txt output may be different than the consensus sequence of the matched known motif in the library.
   - During ["part 2" of motif local optimization](http://homer.ucsd.edu/homer/introduction/motifDetails.html), the motifs are optimized (e.g., substituting in [IUPAC nucleotide ambiguity codes](https://en.wikipedia.org/wiki/Nucleic_acid_notation)) to achieve higher enrichment scores.
@@ -191,10 +212,6 @@ accession/: flat files for accession number conversion
     - A [motif name in a HOMER database](http://homer.ucsd.edu/homer/motif/motifDatabase.html) consists of the transcription factor name and the source of the motif (i.e., GEO accession number or publication author). Since a transcription factor may bind multiple consensus sequences (each representing a distinct motif), distinct motifs may share the same motif name.
     - Because of local optimization of seed motifs (see ["part 2" of motif local optimization](http://homer.ucsd.edu/homer/introduction/motifDetails.html)), a reported known motif (e.g., in knownResults.txt) may have a different consensus sequence than that of the known motif in the known motifs database (e.g., data/knownTFs/vertebrates/known.motifs).
   - Conclusion: There is no fail-proof way to create a 1:1 mapping from enriched known motifs to the original known motif in the known motifs database. One potential solution is to filter by motif name, consensus sequence length, and then consensus sequence similarity.
-
-- [Unanswered] How *exactly* are the hypergeometric p-values calculated?
-  - I understand that the counts of sequences with motifs are estimated (see [Usage](#usage)). However, the p-values I calculate using those counts is still different than what HOMER reports.
-    - Example: 
 
 - [Unanswered] What is the default background set?
   - Is it just data/promoters/[species].base?
