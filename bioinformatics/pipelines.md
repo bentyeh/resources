@@ -1,5 +1,17 @@
 # Snakemake
 
+Cancelling jobs
+- If a job exits with exit code other than 0, then the output files of that job (defined under the `output:` directive of the Snakefile) is automatically deleted by Snakemake.
+- If the main snakemake program is stopped via Ctrl+C (SIGINT signal), then the output of files of jobs running at the time are NOT deleted but instead considered "incomplete."
+  - Incomplete outputs can be identified by running `snakemake --dry-run` (WITHOUT using `--rerun-incomplete`).
+  - Example: There is a bug in the script for a rule that results in some outputs being generated correctly (with exit code 0) and others causing the script to produce an output but hang indefinitely.
+    - Ctrl+C to stop the main snakemake program.
+    - `snakemake --dry-run` (without `--rerun-incomplete`) to identify incomplete files. Remove them manually.
+    - Edit the rule/script to fix the bug.
+    - (If the edits made to the rule/script would trigger Snakemake to rerun the rule for all outputs, even those that were previously generated correctly) `snakemake --touch` (without `--rerun-incomplete`) to touch the previously correctly produced outputs.
+      - This will NOT create any new output.
+    - `snakemake -j <n_jobs>` to re-run the pipeline, only generating new outputs.
+
 Syntax and notes to self
 - Command line interface: https://snakemake.readthedocs.io/en/stable/executing/cli.html
 - Snakefiles (workflows): https://snakemake.readthedocs.io/en/stable/snakefiles/writing_snakefiles.html
