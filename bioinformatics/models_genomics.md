@@ -1,6 +1,17 @@
+Contents
+- [General Library Preparation and Sequencing Considerations](#general-library-preparation-and-sequencing-considerations)
+  - [Library Complexity](#library-complexity)
+    - [Problem: Library Complexity Estimation](#problem-library-complexity-estimation)
+      - [Binomial / Poisson](#binomial--poisson)
+        - [Parameter estimation: maximum likelihood estimator (MLE)](#parameter-estimation-maximum-likelihood-estimator-mle)
+      - [Zero-truncated Poisson](#zero-truncated-poisson)
+        - [Parameter estimation: method of moments](#parameter-estimation-method-of-moments)
+- [RNA-Seq](#rna-seq)
+- [ChIP-Seq](#chip-seq)
+
 # General Library Preparation and Sequencing Considerations
 
-## Estimating Library Complexity
+## Library Complexity
 
 Consider a library of $M$ unique molecular species. Let subscript $i = 1, ..., M$ index these unique molecular species.
 - Let $c_i$ denote the copy number of species $i$ in the library.
@@ -8,9 +19,13 @@ Consider a library of $M$ unique molecular species. Let subscript $i = 1, ..., M
   - Generally, we assume uniform random sampling of reads from the library such that $\pi_i = \frac{c_i}{\sum_{j=1}^M c_j}$.
 - Let $x_i(T)$ be a random variable giving the number of reads for species $i$ obtained from $T$ total reads.
 
-### Binomial / Poisson
+### Problem: Library Complexity Estimation
 
-Problem: Given $d$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+Given $d$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+
+Below, I present a couple simple models for solving this problem. More sophisticated and accurate procedures exist, such as implemented by the [`preseq` package](https://github.com/smithlabcode/preseq) (see [Daley & Smith (2013)](https://doi.org/10.1038/nmeth.2375)).
+
+#### Binomial / Poisson
 
 Assumptions
 - All molecular species are equally represented - i.e., $\pi_i = 1 / M$ for all $i$.
@@ -20,15 +35,21 @@ Assumptions
 Approach
 1. We model the number of reads for each species $i$ as a binomial distribution with $T$ trials with probability $1/M$ of sampling species $i$ on any given trial: $x_i \sim \mathrm{Binomial}(n = T, p = 1/M)$.
    - The expected number of reads per species is $\mathbb{E}(x_i) = \lambda = T / M$.
-   - Since $T$ is large and $1/M$ is small, the binomial distribution is well approximated by the Poisson distribution $x_i \sim \mathrm{Poisson}(\lambda = T/M)$.
+   - The probability of not observing species $i$ is $P(x_i = 0) = {T \choose 0} \left(\frac{1}{M}\right)^0 \left(1 - \frac{1}{M}\right)^{T - 0} = \left(1 - \frac{1}{M}\right)^T$
    - Based on this model, the probability that a given species is observed at least once is
-   $$P(x_i > 0) = 1 - P(x_i = 0) = 1 - \frac{\lambda^0 e^{-\lambda}}{0!} = 1 - e^{-T/M}$$
-2. The number of observed unique species is $D = \sum_{i=1}^M \mathbb{1}\{x_i(T) > 0\}$. Since $x_i$ are i.i.d. for all $i$,
-   $$D \sim \mathrm{Binomial}(n = M, p = P(x_i > 0) = 1 - e^{-T/M})$$
-   - The expected value is $\mathbb{E}(D) = M (1 - e^{-T/M})$.
-   - For $T \ll M$, the Poisson approximation can be used: $D \sim \mathrm{Poisson}(\lambda = M (1 - e^{-T/M}))$.
 
-#### Parameter estimation: maximum likelihood estimator (MLE)
+     $$P(x_i > 0) = 1 - P(x_i = 0) = 1 - \left(1 - \frac{1}{M}\right)^T \approx 1 - e^{-T/M}$$
+
+     - The last approximation uses the Poisson distribution probability $P(x_i = 0) = \frac{\lambda^0 e^{-\lambda}}{0!} = e^{-T/M}$. Since $T$ is large and $1/M$ is small, the binomial distribution is well approximated by the Poisson distribution $x_i \sim \mathrm{Poisson}(\lambda = T/M)$.
+
+2. The number of observed unique species is $D = \sum_{i=1}^M \mathbb{1}\{x_i(T) > 0\}$. Since $x_i$ are i.i.d. for all $i$,
+
+   $$D \sim \mathrm{Binomial}\left(n = M, p = P(x_i > 0) = 1 - \left(1 - \frac{1}{M}\right)^T \approx 1 - e^{-T/M}\right)$$
+
+   - The expected value is $\mathbb{E}(D) = M \left(1 - \left(1 - \frac{1}{M}\right)^T\right) \approx M (1 - e^{-T/M})$.
+     - For $T \ll M$, an additional Poisson approximation can be used: $D \sim \mathrm{Poisson}(\lambda = M (1 - e^{-T/M}))$.
+
+##### Parameter estimation: maximum likelihood estimator (MLE)
 
 We cannot obtain the MLE for the parameter $\lambda = T/M$ for the distribution $x_i \sim \mathrm{Poisson}(\lambda = T/M)$. This is because the MLE
 $$\hat{\lambda} = \frac{1}{M} \sum_{i=1}^M x_i(T)$$
@@ -46,7 +67,7 @@ scipy.optimize.minimize_scalar(
 )
 ```
 
-### Zero-truncated Poisson
+#### Zero-truncated Poisson
 
 Problem: Given mean observed counts per species $\bar{x}$ obtained from $T$ total reads, estimate $M$.
 
@@ -62,7 +83,7 @@ $$
 
 The mean is $\mathbb{E}(x_i) = \frac{\lambda}{1 - e^{-\lambda}}$.
 
-#### Parameter estimation: method of moments
+##### Parameter estimation: method of moments
 
 The method of moments estimator $\hat{\lambda}$ for parameter $\lambda$ (where $\lambda$ is the parameter of the underlying Poisson distribution) is obtained by solving the equation
 
@@ -96,6 +117,16 @@ res = scipy.optimize.minimize_scalar(
 )
 res.x
 ```
+
+### Problem: Optimizing number of reads to sequence
+
+Given a library complexity $M$ and total reads $T$, estimate the number of observed unique molecules $d$. In other words, generate the observed complexity curve (number of unique molecules observed as a function of reads sequenced).
+
+Using the Binomial model presented previously, we get
+
+$$D \sim \mathrm{Binomial}\left(n = M, p = 1 - \left(1 - \frac{1}{M}\right)^T\right)$$
+
+with expected value $\mathbb{E}(D) = M \left(1 - \left(1 - \frac{1}{M}\right)^T\right)$.
 
 # RNA-Seq
 
