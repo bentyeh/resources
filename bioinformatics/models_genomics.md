@@ -6,6 +6,7 @@ Contents
         - [Parameter estimation: maximum likelihood estimator (MLE)](#parameter-estimation-maximum-likelihood-estimator-mle)
       - [Zero-truncated Poisson](#zero-truncated-poisson)
         - [Parameter estimation: method of moments](#parameter-estimation-method-of-moments)
+    - [Problem: Optimizing number of reads to sequence](#problem-optimizing-number-of-reads-to-sequence)
 - [RNA-Seq](#rna-seq)
 - [ChIP-Seq](#chip-seq)
 
