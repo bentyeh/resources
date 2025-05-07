@@ -14,7 +14,7 @@ Cancelling jobs
 
 Syntax and notes to self
 - Command line interface: https://snakemake.readthedocs.io/en/stable/executing/cli.html
-- Snakefiles (workflows): https://snakemake.readthedocs.io/en/stable/snakefiles/writing_snakefiles.html
+- Snakefiles (workflows): see https://snakemake.readthedocs.io/en/stable/snakefiles/writing_snakefiles.html and https://github.com/snakemake/snakemake-lang-vscode-plugin
   - Each rule contains one of `run`/`shell`/`script`/`notebook`/`wrapper`/`template_engine`/`cwl` keywords
   - Supported directives: see the `norunparams` line
     - `input`
@@ -36,6 +36,26 @@ Hierarchy of configurations
 - Configuration file: specify via `--configfile FILE` command line argument or `configfile: "path/to/config.yaml"` Snakefile directive
 - Profile: specify via `--profile FILE` command line argument
 
+
+Profile configuration files
+- The values for resources can be Python commands.
+  - Example: set a default maximum number of threads per rule that can be overriden by rule-specific configurations.
+    ```YAML
+    default-resources:
+        cpus_per_task: min(int(f"{threads}"), 10)
+    set-resources:
+        special_rule:
+            cpus_per_task: 20
+    ```
+    This is more flexible than using a global default maximum
+    ```YAML
+    max-threads: 10
+    ```
+  - Arbitrary code execution appears possible. For example, the following will print the local variable names and values to the cluster log file for the rule after the rule has finished executing.
+    ```YAML
+    default-resources:
+        cpus_per_task: print(locals())
+    ```
 
 Documentation notes
 - The word "directive" is used in the documentation to refer to both 
