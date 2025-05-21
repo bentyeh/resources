@@ -67,6 +67,16 @@ Output files
       ```
     - If the primary and control sequences are not of the same length, SEA uses a Binomial distribution. See the SEA preprint methods section for details.
 
+# FIMO
+
+https://groups.google.com/g/meme-suite/c/BXv4pRCacN8
+
+https://academic.oup.com/bioinformatics/article/23/5/531/238680
+
+https://genomebiology.biomedcentral.com/articles/10.1186/gb-2007-8-2-r24
+
+https://www.bioconductor.org/packages/release/bioc/html/universalmotif.html
+
 # Bailey and Elkan. Fitting a Mixture Model by Expectation Maximization to Discover Motifs in Biopolymers
 
 References
@@ -83,3 +93,9 @@ Model
 
 Missing data: $Z \in \{0,1\}^{n \times 2}$, where $Z_{ij} = 1$ if $X_i$ is from group $j$, $0$ otherwise.
 - Describes group membership: whether the $W$-mer $X_i$ came from the motif group ($j=1$) or background ($j=2$)
+
+# MAST
+
+The scores output by MAST are 100x those output by FIMO: 100 * log2(probability of observing the sequence given that it is part of the motif / probability of observing the sequence given that it is part of the background).
+
+See `src/motif.c:convert_freqs_into_scores()` and https://groups.google.com/g/meme-suite/c/EaSQ5PV-8v0.

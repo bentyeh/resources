@@ -1,7 +1,9 @@
 # Snakemake
 
+> Snakemake offers a domain specific language (DSL) for defining workflows... the language extends the syntax of Python with **directives** to define rules and other workflow specific controls. Technically, this is implemented as a hierarchy of [Mealy machines](https://en.wikipedia.org/wiki/Mealy_machine), each of which is responsible for one of the directives offered by the Snakemake DSL. [[docs](https://snakemake.readthedocs.io/en/v9.4.0/project_info/codebase.html), emphasis mine]
+
 Cancelling jobs
-- If a job exits with exit code other than 0, then the output files of that job (defined under the `output:` directive of the Snakefile) is automatically deleted by Snakemake.
+- If a job exits with exit code other than 0, then the output files of that job (defined under the `output:` directive of the Snakefile) are automatically deleted by Snakemake.
 - If the main snakemake program is stopped via Ctrl+C (SIGINT signal), then the output of files of jobs running at the time are NOT deleted but instead considered "incomplete."
   - Incomplete outputs can be identified by running `snakemake --dry-run` (WITHOUT using `--rerun-incomplete`).
   - Example: There is a bug in the script for a rule that results in some outputs being generated correctly (with exit code 0) and others causing the script to produce an output but hang indefinitely.
@@ -21,10 +23,11 @@ Syntax and notes to self
     - `output`
     - `params`
     - `message`
+    - `wildcard_constraints`
     - `threads`
     - `resources`
-    - `log`: "unlike output files, log files are not deleted upon error" [[source](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files)]
-    - `conda`: ignored unless `--use-conda` flag is set as a command line argument
+    - `log`: "unlike output files, log files are not deleted upon error" [[docs](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files)]
+    - `conda`: ignored unless `--use-conda` (pre-v8) or `--software-deployment-method=conda` (v8+) flag is set as a command line argument
     - `container`
     - `benchmark`
     - `cache`
@@ -32,13 +35,17 @@ Syntax and notes to self
 
 Hierarchy of configurations
 - Command line
-- Snakefile: specify via `--snakefile FILE` command line argument
-- Configuration file: specify via `--configfile FILE` command line argument or `configfile: "path/to/config.yaml"` Snakefile directive
+- Workflow profile specified via the `--workflow-profile DIRECTORY` command line argument
+- Default workflow profile located at `profiles/default` in the working directory or next to the Snakefile
+- Global profile specified via the `--profile DIRECTORY` command line argument
+- Default global profile (location is system-dependent, see `snakemake --help`; on Linux, located at `$HOME/.config/snakemake` and `/etc/xdg/snakemake`)
+- Workflow configuration file specified via the `--configfile FILE` command line argument
+- Workflow configuration file specified via the `configfile: FILE` directive in the Snakefile
+- Snakefile-internal directives
 - Profile: specify via `--profile FILE` command line argument
 
-
 Profile configuration files
-- The values for resources can be Python commands.
+- The values for certain resources can be Python commands.
   - Example: set a default maximum number of threads per rule that can be overriden by rule-specific configurations.
     ```YAML
     default-resources:
@@ -56,6 +63,4 @@ Profile configuration files
     default-resources:
         cpus_per_task: print(locals())
     ```
-
-Documentation notes
-- The word "directive" is used in the documentation to refer to both 
+  - The `tmpdir` resource does not support Python commands or environment variables. [[GitHub issue #3592](https://github.com/snakemake/snakemake/issues/3592)]

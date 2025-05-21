@@ -18,6 +18,7 @@ European Molecular Biology Laboratory
 - [Conferences and Courses](https://www.embl.de/training/events/)
 - [EMBL-EBI Training](https://www.ebi.ac.uk/training)
 
+[Harvard STAT115/215 BIO/BST282: Introduction to Bioinformatics and Computational Biology](https://liulab-dfci.github.io/bioinfo-combio)
 
 # Tutorials
 
@@ -34,6 +35,20 @@ Griffith Lab RNA-Seq Wiki: https://github.com/griffithlab/rnaseq_tutorial/wiki
 # Pipelines
 
 [Bioconductor Workflows](https://www.bioconductor.org/packages/release/BiocViews.html#___Workflow)
+
+# Packages
+
+Actively maintained, well-documented Python general bioinformatics packages
+- [bioframe](https://bioframe.readthedocs.io/): in-memory interval operations built on top of pandas DataFrames
+  - Developed by the Open Chromosome Collective (Open2C); NumFOCUS-affiliated
+- [Biopython](https://biopython.org/)
+  - Developed by the Open Bioinformatics Foundation
+- [scikit-bio](https://scikit.bio/)
+  - Intervals: in-memory interval tree; rudimentary support for finding overlaps
+  - Developed by Zhu lab (ASU), Knight lab (UCSD), and Gutz Analytics; funded by DoE grant
+- [biotite](https://www.biotite-python.org/)
+  - Intervals: annotation objects; rudimentary support for finding overlaps (via slice indices)
+  - Developed by Hamacher lab at Technical University of Darmstadt, Germany; website indicates sponsorship from VantAI
 
 # Miscellaneous
 
@@ -65,3 +80,5 @@ RNA-Seq
 - Conesa, Ana, et al. "A survey of best practices for RNA-seq data analysis." *Genome Biology* 17.1 (2016): 13. https://doi.org/10.1186/s13059-016-0881-8
 
 *Nature Methods* Points of Significance: https://www.nature.com/collections/qghhqm/pointsofsignificance
+
+Collection of notes by Virginia Commonwealth University Professor Mikhail Dozmorov: https://github.com/mdozmorov/MDnotes
