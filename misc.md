@@ -66,4 +66,8 @@ My exclude list: `'-xr0!*/.sync.ffs_db'  '-xr0!*/._*'  '-xr0!*/.DocumentRevision
 
 Note: Info-Zip (`zip`) also has similar updating features via its `--FS/--filesync` and `-DF/--difference-archive` options.
 
-My full 7-zip command: `7zz a OneDrive.7z './OneDrive/*' -ms=off -mtc=on '-xr0!*.sync.ffs_db' '-xr0!*/._*' '-xr0!*/.DocumentRevisions-V100/' '-xr0!*/.DS_Store' '-xr0!*/.fseventsd/' '-xr0!*/.Spotlight-V100/' '-xr0!*/.TemporaryItems/' '-xr0!*/.Trashes/' '-xr0!*/thumbs.db' -sccUTF-8 -snl -p<password>`
+My full 7-zip command: `7zz a OneDrive.7z './OneDrive/*' -ms=off -mtc=on -mmt=8 '-xr0!*.sync.ffs_db' '-xr0!*/._*' '-xr0!*/.DocumentRevisions-V100/' '-xr0!*/.DS_Store' '-xr0!*/.fseventsd/' '-xr0!*/.Spotlight-V100/' '-xr0!*/.TemporaryItems/' '-xr0!*/.Trashes/' '-xr0!*/thumbs.db' -sccUTF-8 -snl -p<password>`
+- `-mtc=on`: "Stores NTFS timestamps for files: Modification time, Creation time, Last access time."
+- `-mmt=8`: Use 8 threads.
+- `-snl`: "Store symbolic links as links"
+- `-sccUTF-8`: Use UTF-8 character set for filename encoding.

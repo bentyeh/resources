@@ -30,7 +30,9 @@ Harvard Chan Bioinformatics Core Training: https://hbctraining.github.io/main/
   - ChIP-seq
   - Variant calling
 
-Griffith Lab RNA-Seq Wiki: https://github.com/griffithlab/rnaseq_tutorial/wiki
+Griffith Lab RNA-Seq Wiki:
+- https://github.com/griffithlab/rnaseq_tutorial/wiki
+- https://rnabio.org/course/
 
 # Pipelines
 
@@ -49,6 +51,11 @@ Actively maintained, well-documented Python general bioinformatics packages
 - [biotite](https://www.biotite-python.org/)
   - Intervals: annotation objects; rudimentary support for finding overlaps (via slice indices)
   - Developed by Hamacher lab at Technical University of Darmstadt, Germany; website indicates sponsorship from VantAI
+
+Actively maintained sequencing/genomics packages
+- [HTSeq](https://htseq.readthedocs.io/)
+- [CNVkit and scikit-genome (skgenome)](https://cnvkit.readthedocs.io/)
+- [bx-python](https://bx-python.readthedocs.io/)
 
 # Miscellaneous
 
