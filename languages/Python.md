@@ -18,57 +18,7 @@ Relevant StackOverflow posts
 - [How to get the environment variables of a subprocess after it finishes running?](https://stackoverflow.com/questions/5905574/how-to-get-the-environment-variables-of-a-subprocess-after-it-finishes-running)
 - [How to get environment variables after running a subprocess](https://stackoverflow.com/questions/63723381/how-to-get-environment-variables-after-running-a-subprocess)
 
-My preferred solution is copied below:
-
-```{python}
-# source: https://stackoverflow.com/a/68339760
-import json
-import os
-import subprocess
-import sys
-from contextlib import AbstractContextManager
-
-class BashRunnerWithSharedEnvironment(AbstractContextManager):
-    """
-    Run multiple bash scripts with persisent environment.
-    Environment is stored to "env" member between runs. This can be updated
-    directly to adjust the environment, or read to get variables.
-    """
-
-    def __init__(self, env=None):
-        if env is None:
-            env = dict(os.environ)
-        self.env: Dict[str, str] = env
-        self._fd_read, self._fd_write = os.pipe()
-
-    def run(self, cmd, **opts):
-        if self._fd_read is None:
-            raise RuntimeError("BashRunner is already closed")
-        write_env_pycode = ";".join(
-            [
-                "import os",
-                "import json",
-                f"os.write({self._fd_write}, json.dumps(dict(os.environ)).encode())",
-            ]
-        )
-        write_env_shell_cmd = f"{sys.executable} -c '{write_env_pycode}'"
-        cmd += "\n" + write_env_shell_cmd
-        result = subprocess.run(
-            ["bash", "-ce", cmd], pass_fds=[self._fd_write], env=self.env, **opts
-        )
-        self.env = json.loads(os.read(self._fd_read, 5000).decode())
-        return result
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        if self._fd_read:
-            os.close(self._fd_read)
-            os.close(self._fd_write)
-            self._fd_read = None
-            self._fd_write = None
-
-    def __del__(self):
-        self.__exit__(None, None, None)
-```
+My personal solution is implemented in the `BashRunnerWithSharedEnvironment` class in my personal [`utils.py` script](https://github.com/bentyeh/scripts/blob/master/Python/utils.py).
 
 # Packages
 
