@@ -4,13 +4,18 @@
   - [Choosing blacklist regions](#choosing-blacklist-regions)
     - [How the Blacklist program works](#how-the-blacklist-program-works)
 - [Genome annotations](#genome-annotations)
+  - [Repeat Masking](#repeat-masking)
 - [UCSC](#ucsc)
 - [NCI Genomic Data Commons](#nci-genomic-data-commons)
   - [Searching and filtering data](#searching-and-filtering-data)
   - [TCGA Barcode](#tcga-barcode)
 - [NCBI Entrez and E-Utilities](#ncbi-entrez-and-e-utilities)
-- [NCBI Sequencing Read Archive (SRA)](#ncbi-sequencing-read-archive-sra)
-  - [SRA Toolkit](#sra-toolkit)
+- [NCBI Genomics Databases](#ncbi-genomics-databases)
+  - [Relationship between GEO, SRA, BioSample, and BioProject accessions](#relationship-between-geo-sra-biosample-and-bioproject-accessions)
+    - [Example](#example)
+  - [Gene Expression Omnibus (GEO)](#gene-expression-omnibus-geo)
+  - [NCBI Sequencing Read Archive (SRA)](#ncbi-sequencing-read-archive-sra)
+    - [SRA Toolkit](#sra-toolkit)
 
 # How-Tos
 
@@ -273,7 +278,63 @@ E-Direct command line tutorials
 Other references
 - NCBI C++ Toolkit documentation: https://ncbi.github.io/cxx-toolkit/
 
-# NCBI Sequencing Read Archive (SRA)
+# NCBI Genomics Databases
+
+## Relationship between GEO, SRA, BioSample, and BioProject accessions
+
+| NCBI Database | Study / Project | Biological Sample | Experiment / Technical Replicate | Run |
+| ------------- | --------------- | ----------------- | -------------------------------- | --- |
+| BioProject / BioSample | BioProject (`PRJNA`) | BioSample (`SAMN`) | | |
+| Sequencing Read Archive | SRA Study (`SRP`) | SRA Sample (`SRS`) | SRA Experiment (`SRX`) | SRA Run (`SRR`) |
+| Gene Expression Omnibus Database | GEO Series (`GSE`) | | GEO Sample (`GSM`) | |
+
+- Columns: accession types in the same column usually map 1:1, except in the Study / Project column:
+  - "The BioProject database defines two types of projects: 1) primary submission projects... are directly associated with submitted data... 2) umbrella projects, which reflect a higher-level organizational structure for larger initiatives or provide an additional level of data tracking." [[NCBI Handbook](https://www.ncbi.nlm.nih.gov/books/NBK169438/)] Therefore, one BioProject can "contain" another BioProject.
+    - For example, ENCODE (which also has its own [dedicated GEO listing page](https://www.ncbi.nlm.nih.gov/geo/encode/)) has multiple layers of umbrella BioProjects: The human ENCODE (ENCyclopedia Of DNA Elements) project ([PRJNA30707](https://www.ncbi.nlm.nih.gov/bioproject/30707))
+      - Pilot projects for the human ENCODE project ([PRJNA13681](https://www.ncbi.nlm.nih.gov/bioproject/13681))
+        - 14 sub-projects ...
+      - Production projects for the human ENCODE project ([PRJNA63441](https://www.ncbi.nlm.nih.gov/bioproject/63441))
+        - Production ENCODE epigenomic data ([PRJNA63443](https://www.ncbi.nlm.nih.gov/bioproject/63443))
+        - Homo sapiens Epigenomics ([PRJNA292727](https://www.ncbi.nlm.nih.gov/bioproject/292727))
+        - Production ENCODE functional genomics data ([PRJNA63447](https://www.ncbi.nlm.nih.gov/bioproject/63447))
+        - Production ENCODE transcriptome data ([PRJNA30709](https://www.ncbi.nlm.nih.gov/bioproject/30709))
+  - Each BioProject and each SRA Study may be associated with multiple GEO Series.
+    - <span style="color:red">Clearly, an umbrella BioProject may be associated with multiple SRA Studies (i.e., 1:many mapping). However, can a primary submission BioProject be associated with multiple SRA Studies?</span>
+    - A single SRA Study can be associated with many GEO Series. For example, the ENCODE SRA Study [SRP012412](https://trace.ncbi.nlm.nih.gov/Traces/?view=study&acc=SRP012412) is associated with GEO Series [GSE177866](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE177866) and [GSE231300](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE231300), among many others.
+- Rows: The relationship is usually 1:many going across a row, left-to-right. However, many:many relationships exist:
+  - As described in the [SRA](#ncbi-sequencing-read-archive-sra) section below, a single SRA Sample (`SRS`) can be associated with multiple SRA Studies (`SRP`).
+  - Similarly, multiple BioProjects can be linked to a single BioSample. [[source](https://www.mcz.harvard.edu/sites/g/files/omnuum6431/files/2025-03/ncbi_bioproject_biosample_data.pdf)]
+- References
+  - Relationship between SRA, BioProject, and BioSample: https://www.ncbi.nlm.nih.gov/sra/docs/submitmeta/, https://www.ncbi.nlm.nih.gov/sra/docs/submitquestions/
+
+### Example
+
+Consider the ENCODE Mint-ChIP-seq experiment [ENCSR928PSU](https://www.encodeproject.org/experiments/ENCSR928PSU/), which generated 2 [technical replicates](https://www.encodeproject.org/data-standards/terms/). Each technical replicate is associated with many read (FASTQ) files, which are not all the same read length. Below, I show the accessions associated with technical replicate 2.
+
+| NCBI Database | Study / Project | Biological Sample | Experiment / Technical Replicate | Run / Library |
+| ------------- | --------------- | ----------------- | -------------------------------- | --- |
+| BioProject / BioSample | [PRJNA63443](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA63443) | [SAMN19597277](https://www.ncbi.nlm.nih.gov/biosample/SAMN19597277) | | |
+| Sequencing Read Archive | [SRP012412](https://trace.ncbi.nlm.nih.gov/Traces/?view=study&acc=SRP012412) | SRS9223741 | [SRX11165854](https://www.ncbi.nlm.nih.gov/sra/SRX11165854[accn]) | 8 runs: [SRR14842522](https://trace.ncbi.nlm.nih.gov/Traces?run=SRR14842522), ..., [SRR14842529](https://trace.ncbi.nlm.nih.gov/Traces/?view=run_browser&acc=SRR14842529) |
+| Gene Expression Omnibus Database | [GSE177866](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE177866) | | [GSM5379091](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5379091) | |
+| ENCODE | | [ENCBS832HZD](https://www.encodeproject.org/biosamples/ENCBS832HZD/) | ENCLB042NQH | ([ENCFF089NQO](https://www.encodeproject.org/files/ENCFF089NQO/) (R1), [ENCFF521RSO](https://www.encodeproject.org/files/ENCFF521RSO/) (R2)), ..., ([ENCFF785QUX](https://www.encodeproject.org/files/ENCFF785QUX/) (R1), [ENCFF204YZK](https://www.encodeproject.org/files/ENCFF204YZK/) (R2)) |
+
+Notes
+- Not all accessions have a useful dedicated page/interface and therefore are not hyperlinked above.
+  - Example: Searching for a SRA Sample accession simply returns a list of associated SRA Experiments (e.g., [SRS9223741](https://www.ncbi.nlm.nih.gov/sra/?term=SRS9223741)).
+  - Example: ENCODE pages for libraries from technical replicates (e.g., [ENCLB042NQH](https://www.encodeproject.org/libraries/ENCLB042NQH/)) are merely JSON dumps; instead, technical replicates are best viewed from the experiment page (e.g., [ENCSR928PSU](https://www.encodeproject.org/experiments/ENCSR928PSU/)).
+- The same SRA sample accession SRS9223741 is associated with 2 SRA experiments: [SRX11165854](https://www.ncbi.nlm.nih.gov/sra/SRX11165854[accn]) (technical replicate 2: see [GSM5379091](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5379091)) and [SRX11165855](https://www.ncbi.nlm.nih.gov/sra/SRX11165855[accn]) (technical replicate 1: see [GSM5379092](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5379092)). This demonstrates how the term "sample" is used differently by SRA / BioSample (referring to a biological sample) vs. GEO (referring to a technical replicate or library).
+- The concept of an ENCODE experiment accession (which may encompass multiple biological and technical replicates) does not appear to neatly correspond to any NCBI accession.
+
+## Gene Expression Omnibus (GEO)
+
+NCBI's [All Resources](https://www.ncbi.nlm.nih.gov/guide/all/) page splits GEO into 3 components:
+- [GEO Database](https://www.ncbi.nlm.nih.gov/geo/): main data repository, with GEO Samples organized into GEO Series.
+- [GEO DataSets](https://www.ncbi.nlm.nih.gov/gds): "a curated collection of biologically and statistically comparable GEO Samples" [[GEO Overview](https://www.ncbi.nlm.nih.gov/geo/info/overview.html)]; accession prefix = `GDS`
+- [GEO Profiles](https://www.ncbi.nlm.nih.gov/geoprofiles/): derived from GEO DataSets
+
+Each of the 3 components has its own interface, but the GEO Database interface appears more limited and, as of 2025-12-03, is not selectable from the database/resource dropdown next to the search bar at the top of most NCBI pages. Instead, both Series and DataSets are searchable using the GEO DataSets interface.
+
+## NCBI Sequencing Read Archive (SRA)
 
 Accession prefixes (see https://www.ncbi.nlm.nih.gov/sra/docs/submitmeta/)
 - STUDY: `SRP#`
@@ -302,7 +363,7 @@ SRA data formats
 
 Accessing SRA data
 - Web interface
-  - [Run Browser](https://www.ncbi.nlm.nih.gov/Traces/index.html?view=run_browser): Search by SRA Run Accession (`SRA#`) to see metadata, taxonomy analysis, read sequences, and data access information about the run, as well as a tool to download FASTA/FASTQ files for runs in the same SRA Experiment.
+  - [Run Browser](https://www.ncbi.nlm.nih.gov/Traces/index.html?view=run_browser): Search by SRA Run Accession (`SRR#`) to see metadata, taxonomy analysis, read sequences, and data access information about the run, as well as a tool to download FASTA/FASTQ files for runs in the same SRA Experiment.
     - The Data access tab indicates where the data is stored (NCBI, AWS, or GCP servers) and what types of egress is free.
     - The FASTA/FASTQ download web interface only allows a limited download of <5 Gb of sequence over HTTP. [[SRA Documentation](https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/)]
   - [Run Selector](https://www.ncbi.nlm.nih.gov/Traces/study/): Search by SRA, BioProject, BioSample, or GEO accessions to see all associated SRA Runs. Offers an interface to download metadata or retrieve the data from cold cloud storage to a cloud bucket.
@@ -353,52 +414,54 @@ Accessing SRA data
       ```
       which will create a folder DRR000110 with the 2 raw data files inside: `090324_30WB8AAXX_s_3_sequence.txt.tar.gz` and `090324_30WB8AAXX_s_4_sequence.txt.tar.gz`.
 
-## SRA Toolkit
+### SRA Toolkit
 
 Documentation: https://github.com/ncbi/sra-tools/wiki
 - Note (as of 2024-08-07): Because there are a lot of Wiki pages, some of them are initially hidden. Click on "Show 11 more pages..." to see all of them.
 
 Building from source: see https://github.com/ncbi/sra-tools/issues/937#issuecomment-2129704817
+- Using CMake:
 
-```
-# set where to install the sratoolkit
-DIR_INSTALL="$HOME/local/sratoolkit"
-# set where to download source code and create build directory
-DIR_TMP="$HOME/tmp/scratch/sratoolkit_build"
+  ```
+  # set where to install the sratoolkit
+  DIR_INSTALL="$HOME/local/sratoolkit"
+  # set where to download source code and create build directory
+  DIR_TMP="$HOME/tmp/scratch/sratoolkit_build"
 
-cd "$DIR_TMP"
-git clone https://github.com/ncbi/ncbi-vdb.git
-git clone https://github.com/ncbi/sra-tools.git
-mkdir build
-cd build
-cmake -S "$(cd ../ncbi-vdb; pwd)" -B ncbi-vdb
-cmake --build ncbi-vdb
-cmake -D VDB_LIBDIR="${PWD}/ncbi-vdb/lib" -D CMAKE_INSTALL_PREFIX="$DIR_INSTALL" -S "$(cd ../sra-tools; pwd)" -B sra-tools 
-cmake --build sra-tools --target install
+  cd "$DIR_TMP"
+  git clone https://github.com/ncbi/ncbi-vdb.git
+  git clone https://github.com/ncbi/sra-tools.git
+  mkdir build
+  cd build
+  cmake -S "$(cd ../ncbi-vdb; pwd)" -B ncbi-vdb
+  cmake --build ncbi-vdb
+  cmake -D VDB_LIBDIR="${PWD}/ncbi-vdb/lib" -D CMAKE_INSTALL_PREFIX="$DIR_INSTALL" -S "$(cd ../sra-tools; pwd)" -B sra-tools 
+  cmake --build sra-tools --target install
 
-# binaries are installed to "$DIR_INSTALL/bin/
-```
+  # binaries are installed to "$DIR_INSTALL/bin/
+  ```
 
+- Using Autoconf
 
-```
-DIR_WD="$(pwd -P)"
-mkdir sra_install
-mkdir sra_build
-mkdir sra_src
-cd sra_src
-git clone https://github.com/ncbi/ncbi-vdb.git
-git clone https://github.com/ncbi/sra-tools.git
-cd ncbi-vdb
-./configure --build-prefix="$DIR_WD/sra_build" --prefix="$DIR_WD/sra_install"
-make
-make install
-cd ../sra-tools
-./configure --build-prefix="$DIR_WD/sra_build" --prefix="$DIR_WD/sra_install"
-make
-make install
+  ```
+  DIR_WD="$(pwd -P)"
+  mkdir sra_install
+  mkdir sra_build
+  mkdir sra_src
+  cd sra_src
+  git clone https://github.com/ncbi/ncbi-vdb.git
+  git clone https://github.com/ncbi/sra-tools.git
+  cd ncbi-vdb
+  ./configure --build-prefix="$DIR_WD/sra_build" --prefix="$DIR_WD/sra_install"
+  make
+  make install
+  cd ../sra-tools
+  ./configure --build-prefix="$DIR_WD/sra_build" --prefix="$DIR_WD/sra_install"
+  make
+  make install
 
-# binaries are now available at "$DIR_WD/bin"
-```
+  # binaries are now available at "$DIR_WD/bin"
+  ```
 
 There are 2 basic ways to download data from the SRA with the SRA Toolkit:
 1. Prefetch and then extract to desired data type
