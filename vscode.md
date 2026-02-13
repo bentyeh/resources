@@ -127,6 +127,33 @@ VS Code has a built-in Markdown previewer, but it does not natively support LaTe
 
 ## Remote - SSH
 
-OpenSSH on Windows does not currently support [ControlMaster](https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing), which allows connections to remain open in the background. One advantage of this feature is to reduce the number of times a user has to enter their password by reusing the existing connection.
+### ControlMaster
 
-Windows Subsystem for Linux (WSL), however, includes an OpenSSH client that does support ControlMaster. Consequently, if you have ControlMaster set up in your WSL ssh config file (see [example for Stanford's Sherlock servers here](https://issm.ess.uci.edu/trac/issm/wiki/sherlock)), you can direct VSCode to use your WSL ssh client: https://stackoverflow.com/questions/60150466/can-i-ssh-from-wsl-in-visual-studio-code.
+[ControlMaster](https://en.wikibooks.org/wiki/OpenSSH/Cookbook/Multiplexing) allows allows SSH connections to remain open in the background. One advantage of this feature is to reduce the number of times a user has to enter their password by reusing the existing connection.
+
+OpenSSH on Windows does not currently support ControlMaster. Windows Subsystem for Linux (WSL), however, includes an OpenSSH client that does support ControlMaster. Consequently, if you have ControlMaster set up in your WSL ssh config file (see [example for Stanford's Sherlock servers here](https://issm.ess.uci.edu/trac/issm/wiki/sherlock)), you can direct VSCode to use your WSL ssh client: https://stackoverflow.com/questions/60150466/can-i-ssh-from-wsl-in-visual-studio-code.
+
+### Connecting to a host via an intermediate proxy
+
+Example use case: connecting to a compute node on an HPC system, where all logins must first go through the login node.
+
+Setup SSH client config file (`~/.ssh/config`): the example below is relevant for the Caltech HPC, where compute nodes have short hostnames matching the format `hpc-*-*`.
+
+  ```
+  Host caltech
+    HostName login3.hpc.caltech.edu
+    User btyeh
+    ControlMaster auto
+    ControlPersist yes
+    IdentityFile ~/.ssh/id_ed25519-caltech
+
+  Host hpc-*-*
+    HostName %h
+    User btyeh
+    ProxyJump caltech
+  ```
+
+Get job allocation on compute node: run `salloc -c <CPUs> --mem=<#>GB --time=<HH:MM:SS> --no-shell` on the login node.
+- The `--no-shell` flag will allocate resources without tying the allocation to the current shell. Without `--no-shell`, exiting the shell will relinquish the job allocation.
+
+Establish SSH connection from the client (e.g., local laptop): Command palette (Cmd+Shift+P) > select `Remote-SSH: Connect to Host...` (or `Remote-SSH: Connect Current Window to Host...`) > enter the hostname of the compute node (e.g., `hpc-90-29`)

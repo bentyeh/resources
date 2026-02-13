@@ -41,20 +41,19 @@ Order of priority
 
 2. Copy the public key to the server: `ssh-copy-id -i ~/.ssh/id_ed25519-caltech.pub btyeh@caltech`
    - This adds the public key (i.e., the contents of `~/.ssh/id_ed25519-caltech.pub`) to `btyeh@caltech:/home/btyeh/.ssh/authorized_keys`
+   - `~/.ssh/authorized_keys` in a user's home directory lists public keys that can be used for logging in as the user using a corresponding private key instead of the user password.
 
-3. Update the SSH client configuration file to point to the private key.
+3. Update the SSH client configuration file (`~/.ssh/config`) to point to the private key. Note that `UseKeychain` is a macOS-specific configuration keyword.
 
-`~/.ssh/config`
+   ```
+   Host caltech
+       Hostname login.hpc.caltech.edu
+       IdentityFile ~/.ssh/id_ed25519-caltech
 
-```
-Host caltech
-    Hostname login.hpc.caltech.edu
-    IdentityFile ~/.ssh/id_ed25519-caltech
-
-Host *
-    AddKeysToAgent yes
-    UseKeychain yes
-```
+   Host *
+       AddKeysToAgent yes
+       UseKeychain yes
+   ```
 
 ## Use
 
@@ -63,8 +62,11 @@ Consider setting up an SSH connection: `ssh btyeh@caltech`
 1. The `IdentityFile ~/.ssh/id_ed25519-caltech` line directs the `ssh` client to ask the `caltech` server if it recognizes the public key at `~/.ssh/id_ed25519-caltech.pub` (i.e., if the same public key is at `btyeh@caltech:~/.ssh/authorized_keys`).
 2. The server SSH daemon `sshd` recognizes the client's public key, then asks for verification that the client "owns" the key.
 3. The client uses the local private key to sign a "challenge" from the server and sends the signature back.
+
    a. The `ssh` client needs the passphrase to access the private key. The `UseKeychain yes` configuration directs the `ssh` client to get the passphrase from the system keychain (e.g., macOS Keychain) instead of prompting the user.
+
    b. The `AddKeysToAgent yes` configuration directs the `ssh client` to give the decrypted private key to `ssh-agent`, which holds it in volatile memory (RAM).
+
    c. Steps 3a and 3b are analogous to manually running `ssh-add ~/.ssh/id_ed25519-caltech`, which will prompt for the passphrase, then add the private key to `ssh-agent`.
       - The `ssh-add --apple-load-keychain` flag is analogous to the `UseKeychain yes` configuration: look for the passphrase from the macOS Keychain first; only prompt the user if it is not found.
       - The passphrase can be manually added to the macOS keychain by using the `--apple-use-keychain` flag. (If only using the `ssh client` with the above configuration file without using `ssh-add -apple-use-keychain` manually, will the passphrase ever get added to the macOS Keychain?)
