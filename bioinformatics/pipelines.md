@@ -45,22 +45,58 @@ Hierarchy of configurations
 - Profile: specify via `--profile FILE` command line argument
 
 Profile configuration files
-- The values for certain resources can be Python commands.
-  - Example: set a default maximum number of threads per rule that can be overriden by rule-specific configurations.
+- Resources
+  - Resources set in the profile are analogous to resources set per-rule in the Snakefile. For example, instead of setting rule-specific resources in the Snakefile,
+    ```
+    # in Snakefile, e.g., at workflow/Snakefile
+    rule myrule:
+        input:    ...
+        output:   ...
+        resources:
+            mem_mb=lambda wc, input: max(2.5 * input.size_mb, 300)
+        shell:
+            "..."
+    ```
+    one can instead set resources in a profile file
     ```YAML
+    # in profile config file, e.g., at workflow/profiles/<profile_name>/config.yaml
+    set-resources:
+        myrule:
+            mem_mb: max(2.5 * input.size_mb, 300)
+    ```
+  - Since [resource values can be dynamically set](https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#dynamic-resources), this means that the values for resources defined in the profile file can be Python commands that act on the following exposed Snakemake variables: `input`, `threads`, `attempt`
+    - Oddly, `wildcards` is not exposed in the profile config file, although it is exposed for resources specified in the Snakefile.
+
+  - Example: when using the SLURM executor, set a default maximum number of threads per rule that can be overriden by rule-specific configurations.
+    ```YAML
+    executor: slurm
     default-resources:
-        cpus_per_task: min(int(f"{threads}"), 10)
+        cpus_per_task: min(threads, 10)
     set-resources:
         special_rule:
             cpus_per_task: 20
     ```
     This is more flexible than using a global default maximum
     ```YAML
+    executor: slurm
     max-threads: 10
     ```
-  - Arbitrary code execution appears possible. For example, the following will print the local variable names and values to the cluster log file for the rule after the rule has finished executing.
+  - Some arbitrary code execution appears possible. For example, the following will print the local variable names and values to the cluster log file for the rule after the rule has finished executing.
     ```YAML
     default-resources:
-        cpus_per_task: print(locals())
+        my_custom_resource: print(locals())
     ```
-  - The `tmpdir` resource does not support Python commands or environment variables. [[GitHub issue #3592](https://github.com/snakemake/snakemake/issues/3592)]
+    However, there seem to be some syntax limitations. For example, the following leads to a Snakemake parsing error:
+    ```YAML
+    default-resources:
+        tmpdir: '/home/btyeh/tmp' if print(locals().keys()) is not None else '/home/btyeh/tmp'
+    ```
+  - As noted in the documentation, values in profiles can make use of globally available environment variables, such as `$USER` or `$TMPDIR`:
+    ```YAML
+    local-storage-prefix: /local/work/$USER/snakemake-scratch
+    ```
+    (This did not work prior to Snakemake version 9.6.0, due to a bug: see [GitHub issue #3592](https://github.com/snakemake/snakemake/issues/3592).)
+
+Plugins
+- Plugins appear to extend the command line arguments available.
+  - Example: In a conda environment where `snakemake` and `snakemake-executor-plugin-slurm` are both installed, running `snakemake --help` shows that all of the arguments documented on the plugin page (https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html#settings) are now available to `snakemake` itself. These arguments can be passed via the command line or via profiles.
