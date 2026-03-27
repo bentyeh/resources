@@ -12,9 +12,11 @@ Searching for files by file type: `type:<MIME type>`
   - Google Forms: `application/vnd.google-apps.freebird`
   - Google Slides: `application/vnd.google-apps.punch`
   - Google Sheets: `application/vnd.google-apps.ritz`
+  - draw.io diagrams: `type:application/vnd.jgraph.mxfile`
 - Google Drive also supports searching both non-Google and Google file types together with certain keywords [[Google Drive Help](https://support.google.com/drive/answer/2375114)]
   > Search by the type of document: folder, document, spreadsheet, presentation, PDF, image, video, drawing, form, site, script, table, or jam file.
   - Of these, `form` (Google Forms), `site` (Google Sites), `script` (Google Apps Script), and `jam` (Google Jamboard) anecdotally appear to specifically search for the corresponding Google file type, while the others (such as `document`) aggregate both Google and non-Google file types.
+- To check the MIME type of a specific Google Drive file, run this Google Colab notebook: https://colab.research.google.com/drive/1HynoxJszxOLz0-v0juwrF1TlJfqPqDQH
 
 ## gdrive
 
