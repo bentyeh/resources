@@ -28,10 +28,17 @@ Given $d$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M
 
 Below, I present a couple simple models for solving this problem. More sophisticated and accurate procedures exist, such as implemented by the [`preseq` package](https://github.com/smithlabcode/preseq) (see [Daley & Smith (2013)](https://doi.org/10.1038/nmeth.2375)).
 
+TODO: what model is used by each of the following packages
+- [`samtools markdup`](https://www.htslib.org/doc/samtools-markdup.html) (when used with `-s` flag): empirically matches what I get with the MLE of the zero-truncated Poisson model.
+- [`picard EstimateLibraryComplexity`](https://gatk.broadinstitute.org/hc/en-us/articles/360037591931-EstimateLibraryComplexity-Picard)
+  - According to Gemini, Picard uses the MLE of the Binomial/Poisson model.
+
 #### Binomial / Poisson
 
 Assumptions
 - All molecular species are equally represented - i.e., $\pi_i = 1 / M$ for all $i$.
+  - This model ignores library sampling steps (PCR cleanup, library pooling) that inevitably break this assumption.
+  - TODO: If we assume perfect PCR amplification (no bias) and only consider post-PCR pre-sequencing sampling steps (PCR cleanup, library pooling), which themselves can be modeled as Binomial / Poisson, is the overall sampling procedure (pre-sequencing + sequencing) still Binomial / Poisson?
 - $x_i$ are i.i.d. for all $i$.
   - While this violates the constraint that $\sum_{i=1}^M x_i(T) = T$ (and relatedly, that $\sum_{i=1}^M \pi_i = 1$), this assumption should not significantly reduce accuracy of estimates in the regime that $x_i(T) \ll T$ for all $i$.
 
@@ -69,8 +76,6 @@ scipy.optimize.minimize_scalar(
   bracket=(d, T)
 )
 ```
-
-According to Gemini, this is identical to the implementation in Picard's EstimateLibraryComplexity tool. (TODO: verify)
 
 #### Zero-truncated Poisson
 
@@ -115,7 +120,7 @@ res = scipy.optimize.minimize_scalar(
 T / res.x
 
 # implementation 2 (equivalent results)
-ub = <some upper bound >= count_total / count_mean>
+ub = <some upper bound >= T / count_mean>
 counts_mean = <mean observed counts>
 T = <total number of reads>
 res = scipy.optimize.minimize_scalar(
@@ -260,13 +265,14 @@ Uniqueness of estimator: for any sample mean $\bar{y}$, there is a unique $\hat{
 
   <!-- </details> -->
 
-The steps above give us an estimator $\hat{\lambda}$ for the parameter $\lambda$ of zero-truncated Poisson model of read counts of individual molecular species. Now, we want to use the estimator $\hat{\lambda}$ to estimate library complexity $M$.
-
-Consider the estimator $\hat{M} = q(\hat{\lambda}) = T / \hat{\lambda}$.
+The steps above give us an estimator $\hat{\lambda}$ for the parameter $\lambda$ of the (zero-truncated) Poisson model of read counts of individual molecular species. Now, we want to use the estimator $\hat{\lambda}$ to estimate library complexity $M$. The true parameters $\lambda$ and $M$ are related by $M = q(\lambda) = T / \lambda$. (From Gemini) By the functional invariance property of the MLE, the MLE of $M$ is $\hat{M}_\text{MLE} = q(\hat{\lambda}_\text{MLE})$.
+- TODO: explain / derive the functional invariance property of MLE.
 - Relevant equalities
   - First derivative: $q'(\hat{\lambda}) = -\frac{T}{\hat{\lambda}^2}$
   - Inverse: $\hat{\lambda} = q^{-1}(\hat{M}) = T / \hat{M}$
-- Consistent: $\hat{M}$ converges to $M$ as ??
+- Consistency
+  - TODO: For a fixed true $M$, does $\hat{M}$ converges to $M$ as $T \rightarrow \infty$?
+  - TODO: For a fixed $T$, how does $\hat{M}$ behave as $M \rightarrow \infty$?
 - Bias: $\hat{M}$ is biased.
   - The function $q(\hat{\lambda}) = T / \hat{\lambda}$ is strictly convex for $\hat{\lambda} > 0$. Consequently, by Jensen's inequality, $q(\mathbb{E}(\hat{\lambda})) < \mathbb{E}(q(\hat{\lambda}))$, or $\frac{T}{\mathbb{E}(\hat{\lambda})} < \mathbb{E}(\hat{M})$.
   - TODO: show that this means that $\mathbb{E}(\hat{M}) \neq M$
@@ -281,8 +287,12 @@ Consider the estimator $\hat{M} = q(\hat{\lambda}) = T / \hat{\lambda}$.
     &= \frac{T^2 (1 - e^{-\hat{\lambda}})^2}{d \hat{\lambda}^3 \left(1 - e^{-\hat{\lambda}} - \hat{\lambda} e^{-\hat{\lambda}} \right)}
     \end{aligned}
     $$
-  - Confidence intervals: Gemini suggests that a confidence interval can be constructed as $\hat{M} \pm z_{\alpha/2} \sqrt{\frac{T^2}{d \hat{\lambda}^4 I(\hat{\lambda})}}$. Is this valid?
+  - Confidence intervals: Gemini suggests that a confidence interval can be constructed as $\hat{M} \pm z_{\alpha/2} \sqrt{\frac{T^2}{d \hat{\lambda}^4 I(\hat{\lambda})}}$.
+    - TODO: Is this valid?
 - Is this the best estimator for $M$?
+  - TODO: Are there more efficient estimators of $M$?
+    - Note that the MLE is already asymptomtically efficient.
+  - TODO: Are there unbiased estimators for $M$?
 
 ### Problem: Optimizing number of reads to sequence
 
