@@ -6,6 +6,8 @@ Contents
         - [Parameter estimation: maximum likelihood estimator (MLE)](#parameter-estimation-maximum-likelihood-estimator-mle)
       - [Zero-truncated Poisson](#zero-truncated-poisson)
         - [Parameter estimation: method of moments](#parameter-estimation-method-of-moments)
+        - [Parameter estimation: maximum likelihood](#parameter-estimation-maximum-likelihood)
+        - [Properties of the MLE and method-of-moments estimator](#properties-of-the-mle-and-method-of-moments-estimator)
     - [Problem: Optimizing number of reads to sequence](#problem-optimizing-number-of-reads-to-sequence)
 - [RNA-Seq](#rna-seq)
 - [ChIP-Seq](#chip-seq)
@@ -22,7 +24,7 @@ Consider a library of $M$ unique molecular species. Let subscript $i = 1, ..., M
 
 ### Problem: Library Complexity Estimation
 
-Given $d$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$.
+Given $d$ unique (deduplicated) reads obtained from $T$ total reads, estimate $M$. Each unique read $j = 1, ..., d$ was observed $y_j(T)$ times, giving a histogram of counts. Given a function $\rho(j)$ that maps the index $j$ of a deduplicated read to its "original" index in the library, we have $y_j(T) = x_{\rho(j)}(T)$.
 
 Below, I present a couple simple models for solving this problem. More sophisticated and accurate procedures exist, such as implemented by the [`preseq` package](https://github.com/smithlabcode/preseq) (see [Daley & Smith (2013)](https://doi.org/10.1038/nmeth.2375)).
 
@@ -68,31 +70,35 @@ scipy.optimize.minimize_scalar(
 )
 ```
 
+According to Gemini, this is identical to the implementation in Picard's EstimateLibraryComplexity tool. (TODO: verify)
+
 #### Zero-truncated Poisson
 
-Problem: Given mean observed counts per species $\bar{x}$ obtained from $T$ total reads, estimate $M$.
+Let $Y_j$ ($j = 1, ..., d$) be read counts for each unique species $j$, where $Y_j$ follows a zero-truncated Poisson distribution with parameter $\lambda$. Let $S = \sum_{j=1}^d Y_j$ and $\bar{Y} = \frac{S}{d}$.
 
-A zero-truncated Poisson distribution "is the conditional probability distribution of a Poisson-distributed random variable, given that the value of the random variable is not zero." [[Wikipedia](https://en.wikipedia.org/wiki/Zero-truncated_Poisson_distribution)] We can derive the probability mass function $g(k; \lambda)$ from a standard Poisson distribution $f(k; \lambda)$:
+A zero-truncated Poisson distribution "is the conditional probability distribution of a Poisson-distributed random variable, given that the value of the random variable is not zero." [[Wikipedia](https://en.wikipedia.org/wiki/Zero-truncated_Poisson_distribution)] We can derive the probability mass function $g(y_j; \lambda)$ from a standard Poisson distribution $f(y_j; \lambda)$:
 
 $$
-g(k; \lambda)
-= P(x_i = k \mid x_i \gt 0)
-= \frac{f(k; \lambda)}{1 - f(0; \lambda)}
-= \frac{\lambda^k e^{-\lambda}}{k! (1 - e^{-\lambda})}
-= \frac{\lambda^k}{k! (e^\lambda - 1)}
+g(y_j; \lambda)
+= P(Y_j = y_j \mid Y_j \gt 0)
+= \frac{f(y_j; \lambda)}{1 - f(0; \lambda)}
+= \frac{\lambda^{y_j} e^{-\lambda}}{y_j! (1 - e^{-\lambda})}
+= \frac{\lambda^{y_j}}{y_j! (e^\lambda - 1)}
 $$
 
-The mean is $\mathbb{E}(x_i) = \frac{\lambda}{1 - e^{-\lambda}}$.
+The mean is $\mathbb{E}(Y_j) = \frac{\lambda}{1 - e^{-\lambda}} = \frac{\lambda e^\lambda}{e^\lambda - 1}$.
 
 ##### Parameter estimation: method of moments
+
+Problem: Given mean observed counts per species $\bar{y}$ obtained from $T$ total reads, estimate $M$.
 
 The method of moments estimator $\hat{\lambda}$ for parameter $\lambda$ (where $\lambda$ is the parameter of the underlying Poisson distribution) is obtained by solving the equation
 
 $$
-\frac{\hat{\lambda}}{1 - e^{-\hat{\lambda}}} = \bar{x}
+\frac{\hat{\lambda}}{1 - e^{-\hat{\lambda}}} = \bar{y}
 $$
 
-where $\bar{x} = \sum_{i=1}^d x_i(T)$ is the sample mean *of the observed counts*.
+where $\bar{y} = \frac{1}{d} \sum_{i=1}^d y_j(T) = \frac{T}{d}$ is the sample mean *of the observed counts*.
 
 Solve numerically:
 ```{python}
@@ -118,6 +124,165 @@ res = scipy.optimize.minimize_scalar(
 )
 res.x
 ```
+
+##### Parameter estimation: maximum likelihood
+
+The likelihood is
+
+$$
+\mathcal{L}(\lambda)
+= \prod_{j=1}^d P(Y_j = y_j)
+= \prod_{j=1}^d \frac{\lambda^{y_j}}{y_j! (e^\lambda - 1)}
+= (e^\lambda - 1)^{-d} \prod_{j=1}^d \frac{\lambda^{y_j}}{y_j!}
+$$
+
+The log-likelihood is therefore
+
+$$
+\begin{aligned}
+\ln \mathcal{L}(\lambda)
+&= \sum_{j=1}^d \ln P(Y_j = y_j) \\
+&= -d \ln(e^\lambda - 1) + \sum_{j=1}^d y_j \ln(\lambda) - \ln(y_j!) \\
+&= -d \ln(e^\lambda - 1) + \ln(\lambda) S - \sum_{j=1}^d \ln(y_j!)
+\end{aligned}
+$$
+
+Differentiate and set to zero:
+
+$$
+\frac{d}{d\lambda} \ln \mathcal{L}(\lambda)
+= -d \frac{e^\lambda}{e^\lambda -1} + \frac{S}{\lambda}
+= 0
+$$
+
+Rearranging yields
+
+$$
+\frac{S}{d}
+= \frac{\lambda e^\lambda}{e^\lambda - 1}
+= \frac{\lambda}{1 - e^{-\lambda}}
+\rightarrow
+\bar{Y} = \frac{\hat{\lambda}}{1 - e^{-\hat{\lambda}}}
+$$
+
+which is the same estimator obtained by the method of moments.
+
+##### Properties of the MLE and method-of-moments estimator
+
+Let $\bar{y} = h(\lambda) = \frac{\lambda}{1 - e^{-\lambda}}$.
+- Derivative: $h'(\lambda) = \frac{1 - e^{-\lambda} - \lambda e^{-\lambda}}{(1 - e^{-\lambda})^2}$
+- Inverse: the estimator satisfies $\hat{\lambda} = h^{-1}(\bar{y})$.
+
+Uniqueness of estimator: for any sample mean $\bar{y}$, there is a unique $\hat{\lambda} > 0$.
+- Since $e^\lambda \geq 1 + \lambda$ (so $e^{-\lambda} \leq \frac{1}{1 + \lambda}$; note that equality only occurs at $\lambda = 0$), the numerator satisfies
+  $$
+  1 - e^{-\lambda} - \lambda e^{-\lambda}
+  \geq 1 - \frac{1}{1 + \lambda} - \frac{\lambda}{1 + \lambda}
+  = \frac{(1 + \lambda) - 1 - \lambda}{1 + \lambda}
+  = 0
+  $$
+  so the numerator is always non-negative with equality only at $\lambda = 0$. The denominator is always non-negative, evaluating to 0 only at $\lambda = 0$. Therefore, $h'(\lambda) > 0$ for $\lambda > 0$: $h$ is a strictly increasingly of function of $\lambda$ for $\lambda > 0$.
+  - Derivation that $e^\lambda \geq 1 + \lambda$: let $A(\lambda) = e^\lambda - 1 - \lambda$. By its first derivative $A'(\lambda) = e^\lambda - 1$, we see that $A$ is increasing for $\lambda > 0$ and equal to 0 at $\lambda = 0$.
+
+- Bias: $\mathbb{\hat{\lambda}}$ is a finite-sample biased but asymptotically unbiased estimator of $\lambda$.
+  - $\bar{y}$ is an unbiased estimator of the mean $\mathbb{E}(\bar{y}) = \mathbb{E}(Y_j)$. However, because $h^{-1}$ is nonlinear,
+  $$
+  \mathbb{E}(\hat{\lambda}) = \mathbb{E}(h^{-1}(\bar{y})) \neq h^{-1}(\mathbb{E}(\bar{y})) = h^{-1}(\mathbb{E}(Y_j)) = \lambda
+  $$
+  - Jensen's inequality?
+  - Consistency?
+
+- Variance: the asymptotic variance is $\mathrm{Var}(\hat{\lambda}) \approx \frac{1}{d I(\lambda)} \approx \frac{\hat{\lambda} (1 - e^{-\hat{\lambda}})^2}{d \left(1 - e^{-\hat{\lambda}} - \hat{\lambda} e^{-\hat{\lambda}} \right)}$
+  - Theory: Under smoothness conditions on $P(Y_j = y_j) = g(y_j; \lambda)$, $\hat{\lambda}_\text{MLE}$ tends to $\mathcal{N}\left(\lambda, \frac{1}{d I(\lambda)}\right)$.
+  - Fisher information: $I(\lambda) = \frac{1 - e^{-\lambda} - \lambda e^{-\lambda}}{\lambda (1 - e^{-\lambda})^2}$
+    <!-- <details> -->
+
+    - First compute the second derivative of the single-observation log-likelihood:
+      $$
+      \begin{aligned}
+      \ln \mathcal{L}_1(\lambda)
+      &= \ln \left(P(Y_j = y) \right) \\
+      &= \ln \left( \frac{\lambda^{y}}{y! (e^\lambda - 1)} \right) \\
+      &= y \ln (\lambda) - \ln (y!) - \ln(e^\lambda - 1) \\
+
+      \rightarrow \frac{d}{d\lambda} \ln \mathcal{L}_1(\lambda)
+      &= \frac{y}{\lambda} - e^\lambda (e^\lambda - 1)^{-1} \\
+
+      \rightarrow \frac{d^2}{d\lambda^2} \ln \mathcal{L}_1(\lambda)
+      &= -\frac{y}{\lambda^2} - e^\lambda (-1)(e^\lambda - 1)^{-2} e^\lambda - e^\lambda(e^\lambda - 1)^{-1} \\
+      &= -\frac{y}{\lambda^2} + e^{2\lambda} (e^\lambda - 1)^{-2} - e^\lambda (e^\lambda - 1) (e^\lambda - 1)^{-2} \\
+      &= -\frac{y}{\lambda^2} + e^{2\lambda} (e^\lambda - 1)^{-2} - (e^{2\lambda} - e^{\lambda}) (e^\lambda - 1)^{-2} \\
+      &= -\frac{y}{\lambda^2} + \frac{e^{\lambda}}{(e^\lambda - 1)^2}
+      \end{aligned}
+      $$
+    - Take its negative expectation and use the expression for the mean of the zero-truncated Poisson $\mathbb{E}(Y_j)$
+      $$
+      \begin{aligned}
+      I(\lambda)
+      &= -\mathbb{E}\left(\frac{d^2}{d\lambda^2} \ln \mathcal{L}_1(\lambda)\right) \\
+      &= -\mathbb{E}\left(-\frac{y}{\lambda^2} + \frac{e^{\lambda}}{(e^\lambda - 1)^2}\right) \\
+      &= \frac{\mathbb{E}(Y_j)}{\lambda^2} - \frac{e^{\lambda}}{(e^\lambda - 1)^2} \\
+      &= \frac{\lambda e^\lambda}{\lambda^2 (e^\lambda - 1)} - \frac{e^{\lambda}}{(e^\lambda - 1)^2} \\
+      &= \frac{\lambda e^\lambda (e^\lambda - 1) - \lambda^2 e^{\lambda}}{\lambda^2 (e^\lambda - 1)^2} \\
+      &= \frac{\lambda e^\lambda (e^\lambda - 1 - \lambda)}{\lambda^2 (e^\lambda - 1)^2} \\
+      &= \frac{e^\lambda (e^\lambda - 1 - \lambda)}{\lambda (e^\lambda - 1)^2} \\
+      \end{aligned}
+      $$
+      - Note that this expression for the Fisher information can be expressed in terms of $e^{-\lambda}$ instead of $e^\lambda$ as follows: Let $x = e^\lambda$, so $1/x = e^{-\lambda}$. Then
+        $$
+        \begin{aligned}
+        I(\lambda)
+        &= \frac{x (x - 1 - \lambda)}{\lambda (x - 1)^2} \\
+        &= \frac{x (x - 1 - \lambda) x^{-2}}{\lambda (x - 1)^2 x^{-2}} \\
+        &= \frac{(x - 1 - \lambda)/x}{\lambda (\frac{x - 1}{x})^2} \\
+        &= \frac{1 - 1/x - \lambda/x}{\lambda (1 - 1/x)^2} \\
+        &= \frac{1 - e^{-\lambda} - \lambda e^{-\lambda}}{\lambda (1 - e^{-\lambda})^2}
+        \end{aligned}
+        $$
+    - The asymptotic variance of the maximum likelihood estimator is
+      $$
+      \mathrm{Var}(\hat{\lambda})
+      \approx \frac{1}{d I(\lambda)}
+      = \frac{\lambda (1 - e^{-\lambda})^2}{d \left(1 - e^{-\lambda} - \lambda e^{-\lambda} \right)}
+      $$
+      In practice, the plug-in estimator is used:
+      $$
+      \widehat{\mathrm{Var}(\hat{\lambda})}
+      = \frac{1}{d I(\hat{\lambda})}
+      = \frac{\hat{\lambda} (1 - e^{-\hat{\lambda}})^2}{d \left(1 - e^{-\hat{\lambda}} - \hat{\lambda} e^{-\hat{\lambda}} \right)}
+      $$
+  - Delta method: TODO
+  - Confidence intervals: For large samples (i.e., large $d$), we can substitute $I(\hat{\lambda})$ for $I(\lambda)$ and get
+    $$
+    P\left( -z_{\alpha/2} \leq \sqrt{d I(\hat{\lambda})}(\hat{\lambda} - \lambda) \leq z_{\alpha/2} \right)
+    = P\left( \lambda - \frac{z_{\alpha/2}}{\sqrt{d I(\hat{\lambda})}} \leq \hat{\lambda} \leq \lambda + \frac{z_{\alpha/2}}{\sqrt{d I(\hat{\lambda})}} \right)
+    $$
+
+  <!-- </details> -->
+
+The steps above give us an estimator $\hat{\lambda}$ for the parameter $\lambda$ of zero-truncated Poisson model of read counts of individual molecular species. Now, we want to use the estimator $\hat{\lambda}$ to estimate library complexity $M$.
+
+Consider the estimator $\hat{M} = q(\hat{\lambda}) = T / \hat{\lambda}$.
+- Relevant equalities
+  - First derivative: $q'(\hat{\lambda}) = -\frac{T}{\hat{\lambda}^2}$
+  - Inverse: $\hat{\lambda} = q^{-1}(\hat{M}) = T / \hat{M}$
+- Consistent: $\hat{M}$ converges to $M$ as ??
+- Bias: $\hat{M}$ is biased.
+  - The function $q(\hat{\lambda}) = T / \hat{\lambda}$ is strictly convex for $\hat{\lambda} > 0$. Consequently, by Jensen's inequality, $q(\mathbb{E}(\hat{\lambda})) < \mathbb{E}(q(\hat{\lambda}))$, or $\frac{T}{\mathbb{E}(\hat{\lambda})} < \mathbb{E}(\hat{M})$.
+  - TODO: show that this means that $\mathbb{E}(\hat{M}) \neq M$
+- Variance
+  - Delta method
+    $$
+    \begin{aligned}
+    \mathrm{Var}(\hat{M})
+    &\approx [q'(\hat{\lambda})]^2 \mathrm{Var}(\hat{\lambda}) \\
+    &\approx \left(-\frac{T}{\hat{\lambda}^2} \right)^2 \frac{1}{d I(\hat{\lambda})} \\
+    &= \frac{T^2}{d \hat{\lambda}^4 I(\hat{\lambda})} \\
+    &= \frac{T^2 (1 - e^{-\hat{\lambda}})^2}{d \hat{\lambda}^3 \left(1 - e^{-\hat{\lambda}} - \hat{\lambda} e^{-\hat{\lambda}} \right)}
+    \end{aligned}
+    $$
+  - Confidence intervals: Gemini suggests that a confidence interval can be constructed as $\hat{M} \pm z_{\alpha/2} \sqrt{\frac{T^2}{d \hat{\lambda}^4 I(\hat{\lambda})}}$. Is this valid?
+- Is this the best estimator for $M$?
 
 ### Problem: Optimizing number of reads to sequence
 
