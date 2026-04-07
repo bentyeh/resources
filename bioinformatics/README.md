@@ -34,6 +34,8 @@ Griffith Lab RNA-Seq Wiki:
 - https://github.com/griffithlab/rnaseq_tutorial/wiki
 - https://rnabio.org/course/
 
+Computational Genomics with R book by Altuna Akalin (head of Bioinformatics and Omics Data Science Platform at the Berlin Institute of Medical Systems Biology, Max Delbrück Center in Berlin): https://compgenomr.github.io/book/
+
 # Pipelines
 
 [Bioconductor Workflows](https://www.bioconductor.org/packages/release/BiocViews.html#___Workflow)
