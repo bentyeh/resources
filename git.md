@@ -12,14 +12,10 @@ Terminology
 
 Basic respository access from command line
 - SSH remotes: autheticate with GitHub CLI or setup an SSH public/private keypair
-  - To setup an SSH public/private keypair:
+  - To setup an SSH public/private keypair (see [ssh.md](ssh.md) for more details):
     1. Generate keypair: `ssh-keygen -t ed25519 -C <GitHub email>`
        - This produces 2 files: `id_ed25519` and `id_ed25519.pub`
     2. [Add the public key in `id_ed25519.pub` to your GitHub account.](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)
-    - I do not understand the benefits of adding an SSH key passphrase, or how it works. [GitHub's documentation](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/working-with-ssh-key-passphrases) writes
-      > With SSH keys, if someone gains access to your computer, the attacker can gain access to every system that uses that key. To add an extra layer of security, you can add a passphrase to your SSH key. To avoid entering the passphrase every time you connect, you can securely cache the key in the SSH agent.
-    
-      Is the key cached to a file on disk or in memory? Is this cache temporary (i.e., you would have the enter the passphrase periodically still)? Given that this procedure removes the requirement of entering the passphrase for each connection, how does this address the original concern that an attacker with access to the computer could "gain access to every system that uses that key"?
 - HTTPS remotes: authenticate with GitHub CLI, use a credential helper like Git Credential Manager, or use a personal access token
   - How does the Git Credential Manager work, if it does not use a personal access token?
 
