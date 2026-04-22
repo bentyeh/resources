@@ -9,19 +9,23 @@ Languages
 - [MATLAB](./MATLAB.md)
 - [LaTeX](./latex.md)
 
-Programming environments
+Programming environments and software engineering tools
 - [Linux](./linux.md)
 - [Visual Studio Code](./vscode.md)
 - [Stanford Computing Resources](./computingStanford.md)
+- [Git](./git.md)
+- [SSH](./ssh.md)
 
 Bioinformatics
+- [General bioinformatics resources](./bioinformatics/README.md)
 - [Nomenclature](./bioinformatics/nomenclature.md)
 - [File types](./bioinformatics/files.md)
 - [Common Databases](./bioinformatics/data.md)
-- [Statistical models for genomics](./bioinformatics/models.md)
+- [Library complexity modeling](./bioinformatics/models_genomics.md)
 - Analyses
   - [Gene expression analysis](./bioinformatics/gene_expression_analysis.md)
   - [Deconvolution](./bioinformatics/deconvolution.md)
+  - [ChIP-seq](./bioinformatics/chip-seq.md)
 - Programs
   - [HOMER](./bioinformatics/homer.md)
   - [HTSlib](./bioinformatics/htslib.md), including samtools and bcftools
@@ -35,6 +39,9 @@ Bioinformatics
 Experimental biology
 - [Microscopy](./experimental_biology/microscopy.md)
 
+Mathematics and statistics
+- [Multiple hypothesis testing](./math_stats/multiple_hypothesis_testing.md)
+- [Expecation maximization (EM) algorithm](./math_stats/em.pdf)
+
 Other
-- [Multiple hypothesis testing](./stats.md)
 - [Miscellaneous](./misc.md)
