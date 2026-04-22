@@ -265,7 +265,8 @@ Uniqueness of estimator: for any sample mean $\bar{y}$, there is a unique $\hat{
 
   <!-- </details> -->
 
-The steps above give us an estimator $\hat{\lambda}$ for the parameter $\lambda$ of the (zero-truncated) Poisson model of read counts of individual molecular species. Now, we want to use the estimator $\hat{\lambda}$ to estimate library complexity $M$. The true parameters $\lambda$ and $M$ are related by $M = q(\lambda) = T / \lambda$. (From Gemini) By the functional invariance property of the MLE, the MLE of $M$ is $\hat{M}_\text{MLE} = q(\hat{\lambda}_\text{MLE})$.
+The steps above give us an estimator $\hat{\lambda}$ for the parameter $\lambda$ of the (zero-truncated) Poisson model of read counts of individual molecular species. Now, we want to use the estimator $\hat{\lambda}$ to estimate library complexity $M$. The true parameters $\lambda$ and $M$ are related by $M = q(\lambda) = T / \lambda$. (From Gemini) By the functional invariance property of the MLE, the MLE of $M$ is
+$$\hat{M}_\text{MLE} = q(\hat{\lambda}_\text{MLE}) = \frac{T}{\hat{\lambda}_\text{MLE}}.$$
 - TODO: explain / derive the functional invariance property of MLE.
 - Relevant equalities
   - First derivative: $q'(\hat{\lambda}) = -\frac{T}{\hat{\lambda}^2}$
