@@ -1,0 +1,262 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+
+% Core packages
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+
+% Paragraphs
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1\baselineskip}
+
+\title{Expectation Maximization (EM)}
+\author{Benjamin Yeh}
+\date{2026-04-21}
+
+\theoremstyle{definition}
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{definition}{Definition}
+\newtheorem*{remark}{Remark}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\begin{document}
+\maketitle
+
+References
+\begin{itemize}
+    \item Wikipedia: \url{https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm}
+    \item Stanford CS229 notes: \url{https://cs229.stanford.edu/main_notes.pdf}
+    \item Caltech BE/Bi 103b: \url{https://bebi103b.github.io/lessons/optimization/em_algorithm.html}
+\end{itemize}
+
+\section{Background}
+
+\subsection{Theorems and Definitions}
+
+\begin{theorem}[Law of the unconscious statistician]
+Let $p_X(x)$ be the probability mass function of a random variable $X$. Let $Y = g(X)$ be a random variable that is a function of $X$. Then, the expected value of $Y$ is
+$$
+\mathbb{E}[Y] = \mathbb{E}[g(X)] = \sum_x g(x)p_X(x)
+$$
+\end{theorem}
+\begin{proof}
+(Adapted from \href{https://en.wikipedia.org/wiki/Law_of_the_unconscious_statistician}{Wikipedia}) Assume that $X$ takes on finitely many different values $x_1, x_2, ...$. The random variable $g(X)$ then has values $g(x_1), g(x_2), ...$, although some of these may coincide with each other. Let $y_1, y_2, ...$ enumerate the possible distinct values of $g(X)$, and for each $i$ let $I_i$ denote the collection of all $j$ with $g(x_j) = y_i$. Let $p_Y(y)$ denote the probability mass function of $Y$. Since a $y_i$ can be the image of multiple distinct $x_j$,
+$$
+p_Y(y_i) = \sum_{j \in I_i} p_X(x_j)
+$$
+Then, according to the definition of expected value,
+$$
+\begin{aligned}
+\mathbb{E}[Y] = \mathbb{E}[g(X)]
+&= \sum_i y_i p_Y(y_i) \\
+&= \sum_i y_i \sum_{j \in I_i} p_X(x_j) \\
+&= \sum_i \sum_{j \in I_i} y_i p_X(x_j) \\
+&= \sum_i \sum_{j \in I_i} g(x_j) p_X(x_j) \\
+&= \sum_x g(x) p_X(x)
+\end{aligned}
+$$
+
+Following the conventions of CS 229 and Wikipedia, the notation used to explicitly indicate that the expected value of $Y = g(X)$ is expressed in terms of the probabiltiy distribution of $X$ is $\mathbb{E}_{X \sim p_X}[g(X)]$.
+\end{proof}
+
+\begin{definition}[Evidence lower bound (ELBO)]
+Let $X$ and $Z$ be random variables jointly distributed with distribution $p(x, z \mid \theta)$. Then, for any distribution $q(z \mid x, \phi)$
+$$
+\begin{aligned}
+\textbf{ELBO}(x, q, \theta)
+&= \sum_z q(z \mid x, \phi) \log \frac{p(x, z \mid \theta)}{q(z \mid x, \phi)} \\
+&= \mathbb{E}_{z \sim q(z \mid x, \phi)} \left[\log \frac{p(x, z \mid \theta)}{q(z \mid x, \phi)} \right]
+\end{aligned}
+$$
+where the second equality relies on the law of the unconscious statistician.
+\end{definition}
+
+\begin{theorem}[Jensen's inequality]
+Let $f$ be a convex function, and let $X$ be a random variable. Then $\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$. Moreover, if $f$ is strictly convex\footnote{A strictly convex scalar function is defined by $f''(x) > 0$ for all $x$. A strictly convex vector-valued function has a positive definite Hessian, $H > 0$.}, then $\mathbb{E}[f(X)] = f(\mathbb{E}(X))$ if and only if $X$ is a constant ($X = \mathbb{E}[X]$).
+\end{theorem}
+
+As a concrete example, if $f$ is a scalar convex function, and $X$ is a scalar random variable with probability mass function $p_X(x)$, Jensen's inequality states that
+$$
+\sum_x \left(f(x) \cdot p_X(x)\right) \geq f\left(\sum_x \left( x \cdot p_X(x) \right) \right).
+$$
+Applying the law of the unconscious statistician gives the shorthand notation $\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$.
+
+\subsection{Problem setup}
+
+Given the statistical model which generates a set $\mathbf{X}$ of observed data, a set of unobserved latent data or missing values $\mathbf{Z}$, and unknown parameters $\theta$ (may be a vector), along with a likelihood function
+$$
+L(\theta; \mathbf{X}, \mathbf{Z}) = p(\mathbf{X}, \mathbf{Z} \mid \theta)
+$$
+the maximum likelihood estimate (MLE) of the unknown parameters is
+$$
+\argmax_\theta L(\theta; \mathbf{X})
+= \argmax_\theta \sum_\mathbf{Z} p(\mathbf{X}, \mathbf{Z} \mid \theta)
+= \argmax_\theta \sum_\mathbf{Z} p(\mathbf{X} \mid \mathbf{Z}, \theta) p(\mathbf{Z} \mid \theta)
+$$
+
+\section{CS 229}
+
+Consider the log-likelihood for a single sample $x$ (and its corresponding latent variable $z$). Let $Q$ be a \textbf{proposal distribution} over possible values of $z$.
+$$
+\begin{aligned}
+\log p(x \mid \theta)
+&= \log \sum_z p(x, z \mid \theta) \\
+&= \log \sum_z Q(z) \frac{p(x, z \mid \theta)}{Q(z)} \\
+&\geq \sum_z Q(z) \log \frac{p(x, z \mid \theta)}{Q(z)} \\
+&= \text{ELBO}(x, Q, \theta)
+\end{aligned}
+$$
+
+where the last step used Jensen's inequality. Specifically, $f(x) = \log x$ is a concave function ($f''(x) = - 1/x^2 < 0$ over its domain $x \in \mathbb{R}_+$). Then,
+
+$$
+f\left(\mathbb{E}_{z \sim Q} \left[\frac{p(x, z \mid \theta)}{Q(z)}\right]\right)
+\geq \mathbb{E}_{z \sim Q} \left[f\left( \frac{p(x, z \mid \theta)}{Q(z)}\right) \right]
+$$
+
+where the $z \sim Q$ subscripts indicate that the expectations are with respect to $z$ drawn from $Q$. To be more explicit about how Jensen's inequality is used here, let $g(Z)$ be the random variable
+$$
+g(Z) = \frac{p(x, Z \mid \theta)}{Q(Z)}.
+$$
+Note that $Z$ is drawn according to $Q$. Then, Jensen's inequality is applied in the form
+$$
+f(\mathbb{E}[g(Z)]) \geq \mathbb{E}[f(g(Z))]
+$$
+
+This inequality ($\log p(x \mid \theta) \geq \text{ELBO}(x, Q, \theta)$) holds for any distribution $Q$. We can make this inequality tight (i.e., hold with equality) if (as noted in Jensen's inequality theorem) $g(Z)$ is constant: let $Q(z) \propto p(x, z \mid \theta)$. Since $Q$ is a distribution and $\sum_z Q(z) = 1$,
+$$
+\begin{aligned}
+Q(z)
+&= \frac{p(x, z \mid \theta)}{\sum_z p(x, z \mid \theta)} \\
+&= \frac{p(x, z \mid \theta)}{p(x \mid \theta)} \\
+&= p(z \mid x, \theta)
+\end{aligned}
+$$
+
+The EM algorithm alternatively updates $Q$ and $\theta$:
+\begin{itemize}
+    \item E-step: Set $Q$ to be the posterior distribution of $z$ given $x$ and the \textit{current} parameters.
+    $$
+    Q(z) = p(z \mid x, \theta^{(t)})
+    $$
+    To be explicit about the dependencies of $Q$, we can write $Q(z \mid x, \theta^{(t)})$ instead of $Q(z)$. This matches the form of $q(z \mid x, \phi)$ used in the definition above of the ELBO, with $\phi = \theta^{(t)}$.
+    \item M-step: Maximize the ELBO function with respect to $\theta$ while \textit{fixing} the choice of $Q$.
+    $$
+    \begin{aligned}
+    \theta^{(t+1)}
+    &= \argmax_\theta \text{ELBO}(x, Q, \theta) \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log \frac{p(x, z \mid \theta)}{Q(z \mid x, \theta^{(t)})} \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) \underbrace{- \sum_z Q(z \mid x, \theta^{(t)}) \log Q(z \mid x, \theta^{(t)})}_{\text{entropy of } Z: \, H(Z \mid x, \theta^{(t)})} \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) \\
+    &= \argmax_\theta \mathbb{E}_{z \sim Q} \log p(x, z \mid \theta)
+    \end{aligned}
+    $$
+    \begin{itemize}
+        \item Notice how the entropy of $Z \mid x, \theta^{(t)}$ does not depend on $\theta$, so that term can be ignored. This makes the CS 229 expression for the M-step equivalent to the Wikipedia expression for the M-step.
+        \item The M-step can be interpreted as maximizing the expected value (over the proposal distribution) of the ``complete-data'' log-likelihood.
+    \end{itemize}
+    \item CS 229 appears to follow an unconventional split of the E- and M-steps. In the conventional description of the EM algorithm (both in the orignal \href{https://doi.org/10.1111/j.2517-6161.1977.tb01600.x}{Dempster et al. (1977) paper} and in Wikipedia), the E-step (\textit{expectation step}) defines the expected value function
+    $$
+    \mathbb{Q}(\theta \mid \theta^{(t)}) = \mathbb{E}_{z \sim Q} \log p(x, z \mid \theta) = \sum_{z} Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta)
+    $$
+and the M-step (\textit{maximization step}) finds the parameters $\theta$ that maximize that expected value function
+$$
+\theta^{(t+1)} = \argmax_\theta \mathbb{Q}(\theta \mid \theta^{(t)}).
+$$
+\end{itemize}
+
+Generalized to a dataset consisting of multiple samples $\{x^{(1)}, ..., x^{(n)}\}$, the log likelihood becomes
+$$
+\begin{aligned}
+\ell(\theta)
+&= \sum_{i=1}^n \log p(x^{(i)} \mid \theta) \\
+&= \sum_{i=1}^n \log \sum_{z^{(i)}} p(x^{(i)}, z^{(i)} \mid \theta) \\
+&\geq \sum_{i=1}^n \sum_{z^{(i)}} Q_i(z^{(i)}) \log \frac{p(x^{(i)}, z^{(i)} \mid \theta)}{Q_i(z^{(i)})} \\
+&= \sum_{i=1}^n \text{ELBO}(x^{(i)}, Q_i, \theta)
+\end{aligned}
+$$
+Here, we introduce one distribution $Q_i$ for each samples $x^{(i)}$ and set each $Q_i$ to be the posterior distribution
+$$
+Q_i(z^{(i)}) = p(z^{(i)} \mid x^{(i)}, \theta)
+$$
+
+The full EM algorithm is therefore as follows:
+\begin{enumerate}
+    \item Initialize $\theta^{(0)}$.
+    \item Repeat until convergence (either the ELBO stops improving, or the parameter values stop changing):
+    \begin{itemize}
+        \item E-step: For each $i$, set 
+        $$
+        Q_i(z^{(i)}) = p(z^{(i)} \mid x^{(i)}, \theta^{(t)})
+        $$
+        \item M-step: Set
+        $$
+        \begin{aligned}
+        \theta^{(t+1)}
+        &= \argmax_\theta \sum_{i=1}^n \text{ELBO}(x^{(i)}, Q_i, \theta) \\
+        &= \argmax_\theta \sum_{i=1}^n \sum_{z^{(i)}} Q(z^{(i)} \mid x^{(i)}, \theta^{(t)}) \log \frac{p(x^{(i)}, z^{(i)} \mid \theta)}{Q(z^{(i)} \mid x^{(i)}, \theta^{(t)})} \\
+        &= \argmax_\theta \sum_{i=1}^n \sum_{z^{(i)}} Q(z^{(i)} \mid x^{(i)}, \theta^{(t)}) \log p(x^{(i)}, z^{(i)} \mid \theta) \\
+        &= \argmax_\theta \sum_{i=1}^n \mathbb{E}_{z^{(i)} \sim Q_i} \log p(x^{(i)}, z^{(i)} \mid \theta)
+        \end{aligned}
+        $$
+    \end{itemize}
+\end{enumerate}
+
+\section{BE/Bi 103b}
+
+While CS 229 describes EM primarily as a substitute for MLE when there are latent variables, it can be used to find other estimators, such as the maximum a posteriori (MAP) estimator. This is the approach taken in the BE/Bi 103b notes and is also briefly mentioned in the original \href{https://doi.org/10.1111/j.2517-6161.1977.tb01600.x}{Dempster et al. (1977) paper}.
+
+The marginal posterior distribution of interest is
+$$
+p(\theta \mid x)
+= \frac{p(x, \theta)}{p(x)}
+$$
+
+The MAP estimate is the value of $\theta$ that maximizes $p(\theta \mid x)$. Since the denominator $p(x)$ is not a function of $\theta$, the objective function is
+$$
+\begin{aligned}
+h(\theta)
+&= \log p(x, \theta) \\
+&= \log \sum_z p(x, z, \theta) \\
+&= \log \sum_z p(x, z \mid \theta) p(\theta) \\
+&= \log \sum_z Q(z) \frac{p(x, z \mid \theta) p(\theta)}{Q(z)} \\
+&\geq \sum_z Q(z) \log \frac{p(x, z \mid \theta) p(\theta)}{Q(z)} \\
+\end{aligned}
+$$
+where $p(\theta)$ is the prior distribution of the parameter values. To make this inequality tight, set $Q(z) = p(z \mid x, \theta)$ such that
+$$
+\begin{aligned}
+\sum_z Q(z) \log \frac{p(x, z \mid \theta) p(\theta)}{Q(z)}
+&= \sum_z p(z \mid x, \theta) \log \frac{p(x, z \mid \theta) p(\theta)}{p(z \mid x, \theta)} \\
+&= \sum_z p(z \mid x, \theta) \log p(x, \theta) \\
+&= \log p(x, \theta) \sum_z p(z \mid x, \theta) \\
+&= \log p(x, \theta)
+\end{aligned}
+$$
+where the second equality comes from the fact that $p(x, z, \theta)$ is equal to both $p(z \mid x, \theta) p(x, \theta)$ and $p(x, z \mid \theta) p(\theta)$, so we can express $p(x, \theta)$ as
+$$
+p(x, \theta) = \frac{p(x, z \mid \theta) p(\theta)}{p(z \mid x, \theta)}.
+$$
+
+Thus, the E- and M-steps are
+\begin{itemize}
+    \item E-step: Set $Q(z \mid x, \theta^{(t)}) = p(z \mid x, \theta^{(t)})$.
+    \item M-step: Maximize the surrogate function
+    $$
+    \begin{aligned}
+    \theta^{(t+1)}
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log \frac{p(x, z \mid \theta) p(\theta)}{Q(z \mid x, \theta^{(t)})} \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) p(\theta) \underbrace{- \sum_z Q(z \mid x, \theta^{(t)}) \log Q(z \mid x, \theta^{(t)})}_{\text{entropy of } Z: \, H(Z \mid x, \theta^{(t)})} \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) p(\theta) \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \left(\log p(x, z \mid \theta) + \log p(\theta) \right) \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) + \sum_z Q(z \mid x, \theta^{(t)}) \log p(\theta) \\
+    &= \argmax_\theta \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) + \log p(\theta) \sum_z Q(z \mid x, \theta^{(t)}) \\
+    &= \argmax_\theta \log p(\theta) + \sum_z Q(z \mid x, \theta^{(t)}) \log p(x, z \mid \theta) + \\
+    &= \argmax_\theta \log p(\theta) + \mathbb{E}_{z \sim Q} \log p(x, z \mid \theta)
+    \end{aligned}
+    $$
+\end{itemize}
+
+\end{document}
