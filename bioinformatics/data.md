@@ -101,15 +101,15 @@ Referencess
 
 Below, I've compiled blacklists from ENCODE and associated labs (Anshul Kundaje and the Boyle lab). For a more comprehensive and updated table of blacklists, see the [`excluderanges` package](https://dozmorovlab.github.io/excluderanges).
 
-| Genome | Blacklist version | Links |
-| ------ | ----------------- | ----- |
-| hg19   | v1                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg19-blacklist.bed.gz), [ENCODE](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz)* |
-| hg19   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg19-blacklist.v2.bed.gz) |
-| hg38   | v1                | [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/hg38-human/hg38.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg38-blacklist.bed.gz) |
-| hg38   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg38-blacklist.v2.bed.gz) |
-| hg38   | v3                | [ENCODE](https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz) |
-| mm10   | v1                | [ENCODE](https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz), [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/mm10-mouse/mm10.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/mm10-blacklist.bed.gz) |
-| mm10   | v2                | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/mm10-blacklist.v2.bed.gz)
+| Genome | Blacklist version | ENCODE file | Other links |
+| ------ | ----------------- | ----------- | ----------- |
+| hg19   | v1                | [ENCFF001TDO](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz)* | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg19-blacklist.bed.gz) |
+| hg19   | v2                |             | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg19-blacklist.v2.bed.gz) |
+| hg38   | v1                | [ENCFF419RSJ](https://www.encodeproject.org/files/ENCFF419RSJ/@@download/ENCFF419RSJ.bed.gz) | [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/hg38-human/hg38.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/hg38-blacklist.bed.gz) |
+| hg38   | v2                |             | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/hg38-blacklist.v2.bed.gz) |
+| hg38   | v3                | [ENCFF356LFX](https://www.encodeproject.org/files/ENCFF356LFX/@@download/ENCFF356LFX.bed.gz) | |
+| mm10   | v1                | [ENCFF547MET](https://www.encodeproject.org/files/ENCFF547MET/@@download/ENCFF547MET.bed.gz) | [Kundaje](http://mitra.stanford.edu/kundaje/akundaje/release/blacklists/mm10-mouse/mm10.blacklist.bed.gz), [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/Blacklist_v1/mm10-blacklist.bed.gz) |
+| mm10   | v2                | [ENCFF543DDX](https://www.encodeproject.org/files/ENCFF543DDX/@@download/ENCFF543DDX.bed.gz) | [GitHub](https://github.com/Boyle-Lab/Blacklist/raw/master/lists/mm10-blacklist.v2.bed.gz) |
 
 \* Confusingly, [Anshul Kundaje's webpage](https://sites.google.com/site/anshulkundaje/projects/blacklists) lists the hg19 annotation file [ENCFF001TDO](https://www.encodeproject.org/files/ENCFF001TDO/@@download/ENCFF001TDO.bed.gz) as both Version 1 and Version 3. The file is identical to Version 1 of the hg19 blacklist on the Boyle Lab GitHub.
 
