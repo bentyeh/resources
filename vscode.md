@@ -7,6 +7,7 @@ The Settings Editor can be invoked by launching the Command Palette (`Ctrl` + `P
   - Most extensions will add settings here
 - [Workspace Settings](https://code.visualstudio.com/docs/getstarted/settings): `<path_to_workspace_directory>\<workspace-name>.code-workspace`
   - Scope: Workspace - only when the workspace is open
+  - The workspace path that VS Code sees depends on how you open the `*.code-workspace` file. If you open it (i.e., File > Open Workspace from File) via `~/<symlink_directory>/myproject.code-workspace`, then VS Code sees the workspace directory as `~/<symlink_directory>`, even if the real path (after resolving symbolic links) is `/some/other/path`.
 - [Folder Settings](https://code.visualstudio.com/docs/editor/multi-root-workspaces#_settings): `<path_to_folder>\.vscode\settings.json`
   - Scope: Folder - only files within the folder
 - Settings apply by precedence. Adding to User/Workspace/Folder Settings masks any [default settings](https://code.visualstudio.com/docs/getstarted/settings#_default-settings) without overwriting them.
