@@ -41,7 +41,7 @@ Format for mouse and human genomes
   - Mouse: chromosomes 1-19, X, and Y = NC_0000[67-87].[version]
   - Accessions for mitochondrial chromosomes and non-reference chromosomes/scaffolds do not follow a linear ordering.
 - Ensembl
-  - Reference chromsomes: 1-22 (human) or 1-19 (mouse) + X + Y+ MT
+  - Reference chromsomes: 1-22 (human) or 1-19 (mouse) + X + Y + MT
   - Alternate loci, novel patches, fix patches: assembly name
   - Unlocalized scaffolds and unplaced scaffolds: GenBank accession
 - [UCSC](#UCSC)
@@ -58,20 +58,26 @@ GRCh38.p14 notes (see also [Google Colab notebook](https://colab.research.google
   - `KI270752.1` (unplaced scaffold): dropped in patch 13 from the RefSeq assembly "because it is hamster sequence derived from the human-hamster CHO cell line" [[UCSC hg38 bigZip](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)]
     - This sequence is still kept in the NCBI GenBank assembly. "Removal of this sequence from the GenBank assembly can only be done at the time of a new major assembly release." [[GRC Issue HG-2587](https://www.ncbi.nlm.nih.gov/grc/human/issues/HG-2587)]
   - `KI270825.1` (alternate locus), `KI270721.1` (unlocalized scaffold), `KI270734.1` (unlocalized scaffold): "contamination or obsolete" sequences dropped in patch 14 from the RefSeq assembly [[UCSC hg38 bigZip](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)]
+- The NCBI reference sequences contain a handful of non-ACGTN characters (e.g., `M`, `Y`, and other degenerate IUPAC base codes).
+  - For example, [`chr1:248752513-248752513` is `M`](https://www.ncbi.nlm.nih.gov/projects/sviewer/?id=NC_000001.11&assm_context=GCF_000001405.40&app_context=genome&v=248752487:248752562&c=null&select=null&slim=0).
 - Comparison with other assemblies to NCBI GenBank
   - NCBI RefSeq: excludes the 4 sequences above
   - Ensembl release 113: contains the 4 sequences above but excludes 3 fix patches `MU273354.1`, `KN538374.1`, and `MU273386.1`
+    - TODO: check if Ensembl's FASTA files also include non-ACGTN characters.
   - UCSC: excludes the 4 sequences above, but contains 2 extra sequences `KQ759759.1` and `KQ759762.2`
     - `KQ759759` and `KQ759762` (fix patches) were updated from version 1 to version 2 in patch 14
     - "Because of the difficulty of removing the old chroms chr11_KQ759759v1_fix and chr22_KQ759762v1_fix from all of the database tables and bigData files, custom tracks, and hubs, we are not dropping them from the UCSC hg38 patch 14 .2bit and chromInfo. However, we have dropped them from chromAlias to accord with the Genbank and Refseq official releases for patch14." [[UCSC hg38 bigZip](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)]
+    - Non-ACGTN positions are replaced with `n` or `N`.
   - GENCODE: many non-reference sequences have no annotations
 
 ## Which genome assembly to use for alignment
 
 References
-- https://lh3.github.io/2017/11/13/which-human-reference-genome-to-use
-- https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/README_analysis_sets.txt
-- https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/
+- [Heng Li's blog: Which human reference genome to use?
+](https://lh3.github.io/2017/11/13/which-human-reference-genome-to-use)
+- [NCBI FTP Server RefSeq GRCh38.p14 Release: Analysis Set README](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/README_analysis_sets.txt)
+- [UCSC Genome Browser hg38 bigZips: README](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/)
+- [Illumina: Demystifying the versions of GRCh38/hg38 reference genomes, how they are used in DRAGEN and their impact on accuracy](https://www.illumina.com/science/genomics-research/articles/dragen-demystifying-reference-genomes.html)
 
 General guidelines
 - Unless the aligner is "ALT-aware" and can appropriately use alternate loci sequences, do not include the alternate loci sequences in alignment indices.
@@ -82,12 +88,22 @@ General guidelines
 - An Epstein-Barr virus (EBV) sequence is often included "as a sink for alignment of reads that are often present in sequencing samples."
 
 FASTA sequences and indices following these guidelines are termed "analysis sets":
-- GRCh38.p14: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/
-- GRCm39: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.27_GRCm39/seqs_for_alignment_pipelines/
-- GRCm38 (mm10): use the initial assembly release sequences, which contains no alternate loci [[UCSC mm10 bigZips](https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/)]
-- T2T CHM13: https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/CHM13/assemblies/analysis_set/ (as pointed to in the [T2T CHM13 GitHub README](https://github.com/marbl/CHM13))
-  - The [NCBI FTP folder for the T2T CHM13 genome](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/) does not contain an analysis set.
-  - Bowtie 2 (see the sidebar on the [manual webpage](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)) provides an index, but it is not masked. Consequently, would reads originating from repetitive/duplicate regions simply fail to align?
+- Human
+  - GRCh38.p14 (hg38)
+    - [NCBI RefSeq](https://ftp.ncbi.nlm.nih.gov/genomes/refseq/vertebrate_mammalian/Homo_sapiens/all_assembly_versions/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/)
+      - The no-alt version includes 195 sequences: chrEBV + 194 chromosomes, unplaced scaffolds, and unlocalized scaffolds, *including the 3 GenBank scaffolds dropped from the RefSeq assembly in patches 13 and 14*
+      - All chromosomes use UCSC-style names
+      - There is a separate "exclusion file" (GCA_000001405.15_GRCh38_GRC_exclusions.bed) indicating "[r]egions in the GRCh38 assembly declared by the GRC to represent contamination or a false duplication," including (among other regions) the 3 GenBank scaffolds dropped from the RefSeq assembly.
+        - None of these regions are actually hard-masked in the analysis set sequences.
+      - The no-alt analysis set Bowtie 2 index provided by NCBI uses these analysis set sequences without additionally masking the exclusion set.
+        - The [Bowtie 2 index provided by NCBI](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GRCh38_major_release_seqs_for_alignment_pipelines/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.bowtie_index.tar.gz) is identical to [that provided by the Bowtie 2 developers](https://genome-idx.s3.amazonaws.com/bt/GRCh38_noalt_as.zip) (as of 2026-05-25).
+        - Non-ACGTN characters are converted to Ns in the index.
+  - T2T CHM13: https://s3-us-west-2.amazonaws.com/human-pangenomics/index.html?prefix=T2T/CHM13/assemblies/analysis_set/ (as pointed to in the [T2T CHM13 GitHub README](https://github.com/marbl/CHM13))
+    - The [NCBI RefSeq FTP folder for the T2T CHM13 genome](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/914/755/GCF_009914755.1_T2T-CHM13v2.0/) does not contain an analysis set.
+    - Bowtie 2 (see the sidebar on the [manual webpage](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml)) provides an index, but it is not masked. Consequently, would reads originating from repetitive/duplicate regions simply fail to align?
+- Mouse
+  - GRCm38 (mm10): use the initial assembly release sequences, which contains no alternate loci [[UCSC mm10 bigZips](https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/)]
+  - GRCm39 (mm39): https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.27_GRCm39/seqs_for_alignment_pipelines/
 
 ## Choosing blacklist regions
 
