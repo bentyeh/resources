@@ -1,5 +1,5 @@
 - [Resources](#resources)
-- [](#)
+- [Background](#background)
 - [Experimental design](#experimental-design)
 - [Compensation](#compensation)
 - [Data formats](#data-formats)
@@ -48,8 +48,20 @@ Miscellaneous
 **Isotype controls** are "antibodies raised against an antigen not found on the cell type or sample analyzed." [[Bio-Rad](https://www.bio-rad-antibodies.com/flow-cytometry-guide-isotype-controls.html)]
 - Purpose: measure non-specific binding or staining of an antibody
   - This is especially important when analyzing blood cells that express Fc receptors
-  - "They should not to be used to determine positive versus negative cells or to set gates, and may not be suitable for intracellular staining."
+  - "They should not to [sic] be used to determine positive versus negative cells or to set gates, and may not be suitable for intracellular staining."
 - An isotype control ideally matches the host species, Ig subclass, fluorophore, and fluorophore:antibody conjugation ratio of the primary antibody.
+- Limitations [[Maecker & Trotter, 2006](https://doi.org/10.1002/cyto.a.20333)]
+  - Background staining varies between antibodies even of the same isotype, so an isotype control may not match the test antibody's background.
+  - They do not account for spillover from other channels.
+
+**Fluorescence-minus-one (FMO) controls** are stained with every antibody in the panel except one; they serve as the gating control for the missing antibody's channel. [[Roederer, 2001](https://doi.org/10.1002/1097-0320(20011101)45:3%3C194::AID-CYTO1163%3E3.0.CO;2-C)]
+- Purpose: measure spillover into that channel. Compensation does not remove the spread that spillover adds, so the negative population can be wider than in an unstained sample. [[Roederer, 2001](https://doi.org/10.1002/1097-0320(20011101)45:3%3C194::AID-CYTO1163%3E3.0.CO;2-C)]
+- Limitation: they do not measure nonspecific binding of the omitted antibody. [[Maecker & Trotter, 2006](https://doi.org/10.1002/cyto.a.20333)]
+
+Choosing gating controls [[Maecker & Trotter, 2006](https://doi.org/10.1002/cyto.a.20333)]
+- Only needed for markers without clearly separated positive and negative populations (e.g., CD25, CD69, cytokines).
+- FMO controls are generally more relevant in multicolor (>4 colors) experiments, where spillover is the main source of background.
+- A biological comparison control (e.g., an unstimulated sample stained with the same antibodies) is usually best when available, since it accounts for both spillover and nonspecific binding.
 
 # Compensation
 
@@ -64,34 +76,36 @@ Miscellaneous
 Flow cytometry file formats and standards are developed and maintained by the ISAC - see https://isac-net.org/page/Data-Standards.
 
 Flow Cytometry Standard (FCS): data file
-- Latest version = 3.1 (ISAC copyright 2008-2009)
+- Latest version = 3.2 (released 2020)
+  - Publication: Spidlen J, Moore W, Brinkman RR; ISAC Data Standards Task Force. ISAC's new FCS 3.2 standard. *Cytometry A*. 2021;99(1):100-102. doi:[10.1002/cyto.a.24225](https://doi.org/10.1002/cyto.a.24225)
+- Previous version = 3.1 (ISAC copyright 2008-2009)
   - Publication: Spidlen J, Moore W, Parks D, et al. Data File Standard for Flow Cytometry, version FCS 3.1. *Cytometry A*. 2010;77(1):97-100. doi:[10.1002/cyto.a.20825](https://doi.org/10.1002/cyto.a.20825)
-- Format: binary
+- Format: ASCII HEADER and TEXT (keyword-value metadata) segments, followed by a DATA segment (typically binary)
 
 Gating Markup Language (Gating-ML): encoding of gating, data transformations and compensation
 - Latest version = 2.0
   - Publication: Spidlen J, Moore W; ISAC Data Standards Task Force, Brinkman RR. ISAC's Gating-ML 2.0 data exchange standard for gating description. *Cytometry A*. 2015;87(7):683-687. doi:[10.1002/cyto.a.22690](https://doi.org/10.1002/cyto.a.22690)
-  - Supports Boolean collections of the following gate types: range, rectangular, quadrant, polygon, and ellipse gates
+  - Supports Boolean collections of the following gate types: rectangle (including 1-D range), quadrant, polygon, and ellipsoid gates
 - Format: XML
 
 # Packages
 
 | Package | Language | GUI / Interactive | Release Date | Links | Notes |
 | ------- | -------- | ----------------- | ------------ | ----- | ----- |
-| Cytoverse (flowCore, flowWorkspace, ggcyto, CytoML, openCyto) | R | none | 2009 (flowCore) | [Homepage](https://cytoverse.org), [flowCore Paper (2009)](https://doi.org/10.1186/1471-2105-10-106), [openCyto Paper (2014)](https://doi.org/10.1371%2Fjournal.pcbi.1003806), [CytoML Paper (2018)](https://doi.org/10.1002/cyto.a.23663), [ggCyto Paper (2018)](https://doi.org/10.1093/bioinformatics/bty441), [GitHub](https://github.com/RGLab/cytoverse) | |
+| Cytoverse (flowCore, flowWorkspace, ggcyto, CytoML, openCyto) | R | none | 2007 (flowCore; Bioconductor 2.0) | [Homepage](https://cytoverse.org), [flowCore Paper (2009)](https://doi.org/10.1186/1471-2105-10-106), [openCyto Paper (2014)](https://doi.org/10.1371%2Fjournal.pcbi.1003806), [CytoML Paper (2018)](https://doi.org/10.1002/cyto.a.23663), [ggCyto Paper (2018)](https://doi.org/10.1093/bioinformatics/bty441), [GitHub](https://github.com/RGLab/cytoverse) | |
 | FlowCytometryTools | Python | draw gates interactively | [2013 (v0.3.0)](https://github.com/eyurtsev/FlowCytometryTools/blob/70edbd6a7f0d5ae882492d56dd4629c5a49a38fe/README.rst?plain=1#L154) | [Homepage](https://eyurtsev.github.io/FlowCytometryTools/), [GitHub](https://github.com/eyurtsev/FlowCytometryTools) | last release in 2021 |
 | Cytoflow | Python | GUI | [2015 (first public release)](https://github.com/cytoflow/cytoflow/releases/tag/0.1.2), 2019 (v1.0) | [Homepage](https://cytoflow.github.io/), [Documentation](https://cytoflow.readthedocs.io), [Preprint (2022)](https://doi.org/10.1101/2022.07.22.501078), [GitHub](https://github.com/cytoflow/cytoflow) | |
 | FlowCal | Python | Excel UI | [2015 (first release)](https://github.com/taborlab/FlowCal/releases/tag/v0.5) | [Paper (2016)](https://doi.org/10.1021/acssynbio.5b00284), [GitHub](https://github.com/taborlab/FlowCal) | |
 | CytoExploreR | R | draw gates interactively | 2018 (initial commit to GitHub as cytoTools), 2020 (v1.0.0 as CytoExploreR) | [Homepage](https://dillonhammill.github.io/CytoExploreR/index.html), [GitHub](https://github.com/DillonHammill/CytoExploreR) | |
 | FlowKit | Python | none | [2019 (first release)](https://github.com/whitews/FlowKit/releases/tag/0.0.9) | [Documentation](https://flowkit.readthedocs.io/en/latest/), [Paper (2021)](https://doi.org/10.3389%2Ffimmu.2021.768541), [GitHub](https://github.com/whitews/FlowKit) | |
 | CytoPy | Python | none | [2020 (v1.0.0)](https://github.com/burtonrj/CytoPy/releases/tag/v1.0.0) | [Documentation](https://cytopy.readthedocs.io/), [Paper (2021)](https://doi.org/10.1371/journal.pcbi.1009071), [GitHub](https://github.com/burtonrj/CytoPy) | last release in 2021 |
-| EasyFlow | Matlab | GUI | [2020](https://github.com/AntebiLab/easyflow/releases) | [Preprint (2023)](https://doi.org/10.1101/2023.08.07.552387), [GitHub](https://github.com/AntebiLab/easyflow) | |
-| EasyFlowQ | Python | GUI | [2022](https://github.com/ym3141/EasyFlowQ/releases) | [Documentation](https://ym3141.github.io/EasyFlowQ/), [Preprint (2023)](https://doi.org/10.1101/2023.08.07.552387), [GitHub](https://github.com/ym3141/EasyFlowQ) | written by Yitong Ma, a former Caltech PhD student from the Elowitz lab |
+| EasyFlow | Matlab | GUI | [2020](https://github.com/AntebiLab/easyflow/releases) | [Preprint (2023)](https://doi.org/10.1101/2023.08.07.552387), [Paper (2024)](https://doi.org/10.1371/journal.pone.0308873), [GitHub](https://github.com/AntebiLab/easyflow) | |
+| EasyFlowQ | Python | GUI | [2022](https://github.com/ym3141/EasyFlowQ/releases) | [Documentation](https://ym3141.github.io/EasyFlowQ/), [Preprint (2023)](https://doi.org/10.1101/2023.08.07.552387), [Paper (2024)](https://doi.org/10.1371/journal.pone.0308873), [GitHub](https://github.com/ym3141/EasyFlowQ) | written by Yitong Ma, a former Caltech PhD student from the Elowitz lab |
 | pytometry | Python | none | [2022](https://github.com/scverse/pytometry/releases) | [Homepage](https://pytometry.netlify.app/), [Preprint (2022)](https://doi.org/10.1101/2022.10.10.511546), [GitHub](https://github.com/scverse/pytometry) | |
 
 Unmaintained: [fcm (Python)](https://github.com/jfrelinger/fcm)
 
-See also Figure 1 from the [FlowKit paper (2021)](https://doi.org/10.3389/fimmu.2021.768541) for a features comparison of open source flow cytometry software.
+See also Table 1 from the [FlowKit paper (2021)](https://doi.org/10.3389/fimmu.2021.768541) for a features comparison of open source flow cytometry software.
 
 ## R / Bioconductor
 
@@ -103,6 +117,6 @@ Resources
 
 # Other tools
 
-- FlowJo
-- Cytobank: 
-Free web-based program: [Floreada.io](https://floreada.io/)
+- FlowJo (BD)
+- Cytobank (Beckman Coulter)
+- Free web-based program: [Floreada.io](https://floreada.io/)
