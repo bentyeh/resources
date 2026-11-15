@@ -67,7 +67,8 @@ for path in "${directory}"/*/*.md; do
     if [ "$force" = true ] || [ ! -f "$output_path" ] || [ "$path" -nt "$output_path" ]; then
         echo "${subdir}/${filename}"
         pandoc -s --mathjax \
-            --toc --variable toc-title="Contents" --metadata title="$filename" \
+            --toc --variable toc-title="Contents" \
             -f gfm -t html -o "$output_path" "$path"
+            # --metadata title="$filename"
     fi
 done
