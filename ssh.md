@@ -27,6 +27,20 @@ Order of priority
 2. user's configuration file (~/.ssh/config)
 3. system-wide configuration file (/etc/ssh/ssh_config)
 
+Configuration file syntax
+- Lines starting with '#' and empty lines are interpreted as comments.
+- General structure: sections of parameter-value pairs separated by `Host` specifications. `Host` patterns consist of non-whitespace characters and the wildcards '*' (matches zero or more characters) or '?' (matches exactly one character).
+
+  ```
+  Host <pattern1>
+      <host1_parameter1> <host1_value1>
+      ...
+
+  Host <pattern2>
+      <host2_parameter1> <host2_value1>
+      ...
+  ```
+
 # Example workflow
 
 ## Setup
@@ -55,6 +69,55 @@ Order of priority
        UseKeychain yes
    ```
 
+To inspect the private and public keys that were created:
+- public key: `~/.ssh/id_ed25519-caltech.pub`
+  - Encryption: none; stored in plaintext
+  - Format: OpenSSH public key files contain 3 parts: `<key_type> <key> <comment>`
+    - The key type indicates the algorithm used, such as "ssh-ed25519", "ssh-rsa", or "ecdsa-sha2-nistp256".
+    - The key is encoded in Base64.
+    - The comment is optional and ignored during authentication; it is solely for human identification.
+  - The cryptographic hash of a public key is called a **fingerprint**.
+    - How to generate: use the `-l` flag of `ssh-keygen`.
+      ```bash
+      $ ssh-keygen -l -f ~/.ssh/id_ed25519-caltech.pub
+      256 SHA256:<value> <comment> (ED25519)           # key size, hash, comment, key type
+      ```
+      - The same hash can be generated from the private key: `ssh-keygen -l -f ~/.ssh/id_ed25519-caltech`
+    - Purpose: verify that another party has the same public key.
+      - Since a hash is a one-way summary, the hash can be shared without exposing the actual public key. However, since public keys aren't kept secret anyway, fingerprints primarily offer a practical benefit: short hashes are easier to compare by eye than long public keys.
+      - Example: GitHub ([github.com/settings/keys](https://github.com/settings/keys)) shows the fingerprints of public keys that a user has shared with GitHub.
+- private key: `~/.ssh/id_ed25519-caltech`
+  - Encryption: depends on whether a passphrase was used at generation (see above)
+    - The passphrase is converted into an encryption key using a key derivation function (bcrypt), and the private key is encrypted with that key (AES-256 by default). See the [OpenSSH private key format specification](https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key) for technical details.
+    - To encrypt (add a passphrase to) an existing private key file, or change the passphrase of an existing encrypted private key file:
+      ```bash
+      $ ssh-keygen -p -f ~/.ssh/id_ed25519-caltech
+      Enter old passphrase:                              # only shown if the file is currently encrypted
+      Key has comment '<comment>'
+      Enter new passphrase (empty for no passphrase):
+      Enter same passphrase again:
+      Your identification has been saved with the new passphrase.
+      ```
+      - The private key itself is unchanged; only its encryption changes. Hence, the public key and its fingerprint are unchanged, and the public key does not need to be re-copied to any servers.
+    - To decrypt an existing encrypted private key file (i.e., remove its passphrase):
+      ```bash
+      $ ssh-keygen -p -f ~/.ssh/id_ed25519-caltech -N ""
+      Enter old passphrase:
+      Key has comment '<comment>'
+      Your identification has been saved with the new passphrase.
+      ```
+      - `-N ""` sets the new passphrase to the empty string. An empty passphrase means "no passphrase" ([`man ssh-keygen`](https://man.openbsd.org/ssh-keygen)), so the private key is saved unencrypted (in plaintext).
+      - Equivalently, run `ssh-keygen -p -f ~/.ssh/id_ed25519-caltech` without `-N ""` and press Enter at both new-passphrase prompts.
+      - Despite the message "saved with the new passphrase", the file is no longer encrypted.
+  - Format: OpenSSH private key files contain Base64-encoded data between a header and footer line:
+    ```
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    <Base64-encoded data>
+    -----END OPENSSH PRIVATE KEY-----
+    ```
+    - The encoded data includes a copy of the public key, which is always stored unencrypted. This is why the fingerprint can be generated from the private key file without the passphrase (see above).
+    - The encoded data also includes the private key and the comment, which are encrypted if a passphrase was used.
+
 ## Use
 
 Consider setting up an SSH connection: `ssh btyeh@caltech`
@@ -65,11 +128,11 @@ Consider setting up an SSH connection: `ssh btyeh@caltech`
 
    a. The `ssh` client needs the passphrase to access the private key. The `UseKeychain yes` configuration directs the `ssh` client to get the passphrase from the system keychain (e.g., macOS Keychain) instead of prompting the user.
 
-   b. The `AddKeysToAgent yes` configuration directs the `ssh client` to give the decrypted private key to `ssh-agent`, which holds it in volatile memory (RAM).
+   b. The `AddKeysToAgent yes` configuration directs the `ssh` client to give the decrypted private key to `ssh-agent`, which holds it in volatile memory (RAM).
 
    c. Steps 3a and 3b are analogous to manually running `ssh-add ~/.ssh/id_ed25519-caltech`, which will prompt for the passphrase, then add the private key to `ssh-agent`.
       - The `ssh-add --apple-load-keychain` flag is analogous to the `UseKeychain yes` configuration: look for the passphrase from the macOS Keychain first; only prompt the user if it is not found.
-      - The passphrase can be manually added to the macOS keychain by using the `--apple-use-keychain` flag. (If only using the `ssh client` with the above configuration file without using `ssh-add -apple-use-keychain` manually, will the passphrase ever get added to the macOS Keychain?)
+      - The passphrase can be manually added to the macOS keychain by using the `--apple-use-keychain` flag. (If only using the `ssh` client with the above configuration file without using `ssh-add --apple-use-keychain` manually, will the passphrase ever get added to the macOS Keychain?)
 
 ## Port forwarding
 
@@ -100,9 +163,10 @@ How to avoid authentication each time you log in?
 - Add the following lines to `~/.ssh/config` on your local machine (i.e., laptop):
   ```
   Host <hostname, e.g., login.sherlock.stanford.edu>
-    ControlMaster auto
-    ControlPersist yes
-    ControlPath ~/.ssh/%l%r@%h:%p
+      Hostname <hostname, e.g., login.sherlock.stanford.edu>
+      ControlMaster auto
+      ControlPersist yes
+      ControlPath ~/.ssh/%l%r@%h:%p
   ```
 - To control an active connection multiplexing process: `ssh -O <ctl_cmd> <host>`
   - `<ctl_cmd>`
