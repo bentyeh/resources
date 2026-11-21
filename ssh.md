@@ -138,6 +138,11 @@ Consider setting up an SSH connection: `ssh btyeh@caltech`
       - The `ssh-add --apple-load-keychain` flag is analogous to the `UseKeychain yes` configuration: look for the passphrase from the macOS Keychain first; only prompt the user if it is not found.
       - The passphrase can be manually added to the macOS keychain by using the `--apple-use-keychain` flag. (If only using the `ssh` client with the above configuration file without using `ssh-add --apple-use-keychain` manually, will the passphrase ever get added to the macOS Keychain?)
 
+## How SSH obtains a private key
+
+1. `ssh` first tries to get the private key from the socket established by `ssh-agent`
+2. If that fails, `ssh` then reads the private key file (~/.ssh/id*) directly.
+
 ## Port forwarding
 
 `ssh` options
