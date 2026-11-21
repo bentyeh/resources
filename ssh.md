@@ -89,6 +89,10 @@ To inspect the private and public keys that were created:
 - private key: `~/.ssh/id_ed25519-caltech`
   - Encryption: depends on whether a passphrase was used at generation (see above)
     - The passphrase is converted into an encryption key using a key derivation function (bcrypt), and the private key is encrypted with that key (AES-256 by default). See the [OpenSSH private key format specification](https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.key) for technical details.
+    - To check if a private key file is encrypted: `ssh-keygen -y -f ~/.ssh/id_ed25519-caltech`
+      - If the file is encrypted, then you will be first prompted for a passphrase. Otherwise, no prompt is displayed.
+      - `ssh-keygen -y`: prints the public key corresponding to the specified private key file
+        - The output will be identical to the contents of the public key file `~/.ssh/id_ed25519-caltech.pub` (see above) but does not depend on the existence of `~/.ssh/id_ed25519-caltech.pub`.
     - To encrypt (add a passphrase to) an existing private key file, or change the passphrase of an existing encrypted private key file:
       ```bash
       $ ssh-keygen -p -f ~/.ssh/id_ed25519-caltech
